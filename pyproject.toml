@@ -54,7 +54,10 @@ test_runners = [
 ]
 python_tests = [
     # Python test suite
+    "environs[django]",
+    "psycopg[binary]",
     "pytest",
+    "pytest-django",
 ]
 
 # Mypy
