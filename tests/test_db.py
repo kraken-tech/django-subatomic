@@ -1,0 +1,664 @@
+from __future__ import annotations
+
+import re
+from typing import TYPE_CHECKING
+from unittest import mock
+
+import pytest
+from django import db as django_db
+from django.db import transaction as django_transaction
+
+from django_subatomic import db, test
+
+
+if TYPE_CHECKING:
+    import contextlib
+    from collections.abc import Callable, Generator
+    from typing import Protocol
+
+    import pytest_django
+    from _pytest.mark.structures import MarkDecorator
+
+    class DBContextManager(Protocol):
+        def __call__(
+            self, *, using: str | None = None
+        ) -> contextlib.AbstractContextManager[None, None]: ...
+
+
+DEFAULT = "default"
+OTHER = "other"
+
+# By default, assume tests in this module need access to the default database.
+pytestmark = [pytest.mark.django_db(databases=[DEFAULT])]
+
+
+def _parametrize_transaction_testcase(func: Callable[..., None]) -> MarkDecorator:
+    """
+    Make a test run once as a transaction test case, and once as a normal test case.
+    """
+    parametrize = pytest.mark.parametrize(
+        "_is_transaction_testcase",
+        (
+            pytest.param(
+                True,
+                id="no transaction",
+                marks=[pytest.mark.django_db(transaction=True)],
+            ),
+            pytest.param(
+                False,
+                id="testsuite transaction",
+                marks=[],
+            ),
+        ),
+    )
+
+    # Decorating the test with `usefixtures` means the test doesn't need
+    # to accept _is_transaction_testcase` as a function parameter.
+    usefixtures = pytest.mark.usefixtures("_is_transaction_testcase")
+
+    return parametrize(usefixtures(func))  # type: ignore[no-any-return]
+
+
+@pytest.fixture(autouse=True)
+def _require_transactions_for_after_commit_callbacks(
+    request: pytest.FixtureRequest,
+) -> Generator[None]:
+    """
+    Ensure after-commit callbacks are executed from within a transaction.
+
+    This ensures that we do not accidentally write code which looks like it defers execution,
+    but is actually running immediately.
+
+    This fixture enables that new behaviour for all new tests by default,
+    but offers an escape-hatch for tests which have not yet been fixed.
+
+    TODO: Allow users of this library to do this in their own tests.
+
+    See Note [After-commit callbacks require a transaction].
+    """
+    if "deprecated_run_after_commit_outside_transaction" in request.keywords:
+        with mock.patch.object(
+            db, "_REQUIRE_TRANSACTION_FOR_AFTER_COMMIT_CALLBACKS", new=False
+        ):
+            yield
+    else:
+        yield
+
+
+@pytest.fixture(autouse=True)
+def _prevent_after_commit_callbacks(
+    request: pytest.FixtureRequest,
+) -> Generator[None, None, None]:
+    """
+    Disable automatically running after-commit callbacks in marked tests.
+
+    If a test relies on after-commit callbacks never being called, it may be
+    marked with `deprecated_ignore_after_commit_callbacks` to disable test simulation
+    of how after-commit callbacks are naturally run after transactions.
+
+    TODO: Allow users of this library to do this in their own tests.
+
+    See Note [Running after-commit callbacks in tests]
+    """
+    if "deprecated_ignore_after_commit_callbacks" in request.keywords:
+        with mock.patch.object(db, "_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", new=False):
+            yield
+    else:
+        yield
+
+
+class Counter:
+    def __init__(self) -> None:
+        self.count = 0
+
+    def increment(self) -> None:
+        self.count += 1
+
+
+class _AnError(Exception):
+    pass
+
+
+class TestTransaction:
+    @pytest.mark.django_db(transaction=True)
+    def test_fails_when_in_tranaction(self) -> None:
+        """
+        Nested transactions are not allowed.
+        """
+        with django_transaction.atomic():
+            with pytest.raises(
+                RuntimeError,
+                match=re.escape(
+                    "A durable atomic block cannot be nested within another atomic block."
+                ),
+            ):
+                with db.transaction():
+                    pass
+
+    @pytest.mark.django_db(transaction=True)
+    def test_creates_transaction(self) -> None:
+        """
+        A transaction is active within the context manager.
+        """
+        assert django_transaction.get_autocommit() is True
+
+        with db.transaction():
+            assert django_transaction.get_autocommit() is False
+
+        assert django_transaction.get_autocommit() is True
+
+    @pytest.mark.django_db(transaction=True)
+    def test_decorator(self) -> None:
+        """
+        `transaction` can be used as a decorator.
+        """
+        was_called = False
+
+        @db.transaction()
+        def inner() -> None:
+            assert django_transaction.get_autocommit() is False
+            nonlocal was_called
+            was_called = True
+
+        assert django_transaction.get_autocommit() is True
+        inner()
+
+        assert was_called is True
+        assert django_transaction.get_autocommit() is True
+
+    def test_works_in_tests(self) -> None:
+        """
+        Tests can call `db.transaction` without a fuss.
+
+        Django tests are usually run in a transaction. It's worth testing
+        to make sure the workarounds from pytest-django work with our tool.
+        """
+        with db.transaction():
+            assert django_transaction.get_autocommit() is False
+
+
+class TestOnCommitCallbacksInTests:
+    @_parametrize_transaction_testcase
+    def test_callbacks_executed_when_leaving_transaction(self) -> None:
+        """
+        Callbacks are executed when exiting the outermost "transaction" block.
+        """
+        counter = Counter()
+
+        with db.transaction():
+            with db.transaction_if_not_already():
+                db.run_after_commit(counter.increment)
+                assert counter.count == 0
+
+            assert counter.count == 0
+
+        assert counter.count == 1
+
+
+class TestTransactionRequired:
+    @_parametrize_transaction_testcase
+    def test_manager_fails_when_not_in_transaction(self) -> None:
+        """
+        Raise when not in transaction (using transaction testcase).
+        """
+        with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
+            with db.transaction_required():
+                pass
+
+        assert exc.value.database == DEFAULT
+
+    @_parametrize_transaction_testcase
+    def test_decorator_fails_when_not_in_transaction(self) -> None:
+        """
+        An error is raised when we're not in a transaction.
+        """
+
+        @db.transaction_required()
+        def inner() -> None: ...
+
+        with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
+            inner()
+
+        assert exc.value.database == DEFAULT
+
+    @_parametrize_transaction_testcase
+    def test_no_error_when_in_transaction(self) -> None:
+        """
+        No error is raised when we're in a transaction.
+        """
+        with db.transaction():
+            try:
+                with db.transaction_required():
+                    ...
+            except db._MissingRequiredTransaction:  # noqa: SLF001
+                pytest.fail("We should not have raised MissingRequiredTransaction.")
+
+
+class TestSavepointContextManager:
+    def test_fails_when_not_in_transaction(self) -> None:
+        """
+        An error is raised when trying to create a savepoint outside of a transaction.
+        """
+        # Note: We didn't create a transaction first.
+        with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
+            with db.savepoint():
+                pass
+
+        assert exc.value.database == DEFAULT
+
+    def test_not_a_decorator(self) -> None:
+        """
+        `savepoint` cannot be used as a decorator.
+        """
+        with pytest.raises(db.NotADecorator):
+
+            @db.savepoint()
+            def inner() -> None: ...
+
+    @test.part_of_a_transaction()
+    def test_creates_savepoint(
+        self, django_assert_num_queries: pytest_django.DjangoAssertNumQueries
+    ) -> None:
+        """
+        `savepoint` creates an SQL SAVEPOINT when in a transaction.
+        """
+        with django_assert_num_queries(2) as queries:
+            with db.savepoint():
+                pass
+
+        create_savepoint, release_savepoint = queries
+
+        assert create_savepoint["sql"].startswith("SAVEPOINT ")
+        assert release_savepoint["sql"].startswith("RELEASE SAVEPOINT ")
+
+
+class TestTransactionIfNotAlready:
+    def test_transaction_already_exists(
+        self, django_assert_num_queries: pytest_django.DjangoAssertNumQueries
+    ) -> None:
+        with db.transaction():
+            # No queries are made to create a transaction if one already exists.
+            # In particular, we don't want to see a savepoint created here.
+            with django_assert_num_queries(0):
+                with db.transaction_if_not_already():
+                    pass
+
+    @pytest.mark.django_db(transaction=True)
+    def test_no_existing_transaction(
+        self, django_assert_num_queries: pytest_django.DjangoAssertNumQueries
+    ) -> None:
+        assert django_transaction.get_autocommit() is True
+
+        with db.transaction_if_not_already():
+            assert django_transaction.get_autocommit() is False
+
+        assert django_transaction.get_autocommit() is True
+
+    def test_cannot_query_after_exception_in_test_case(self) -> None:
+        """
+        Check that we do not have a working database connection and may not do queries after
+        catching an exception and before rolling back.
+
+        The outer atomic block will be unusable because we have not rolled back after the
+        exception.
+        """
+        with db.transaction():
+            with pytest.raises(_AnError):
+                with db.transaction_if_not_already():
+                    raise _AnError
+
+            with pytest.raises(django_transaction.TransactionManagementError):
+                with django_db.connections["default"].cursor() as cursor:
+                    cursor.execute("SELECT 1")
+
+    def test_can_query_after_exception_in_test_case(self) -> None:
+        """
+        Check that we have a working database connection and may do queries after catching an exception.
+
+        The test case transaction will be unusable if we do not have a savepoint to roll back to.
+        """
+        with pytest.raises(_AnError):
+            with db.transaction_if_not_already():
+                raise _AnError
+
+        with django_db.connections["default"].cursor() as cursor:
+            cursor.execute("SELECT 1")
+
+
+@db.durable
+def _durable_example() -> bool:
+    return True
+
+
+@db.durable
+def _create_unclosed_manual_transaction(db_name: str) -> None:
+    django_transaction.set_autocommit(False, using=db_name)
+
+
+class TestDurable:
+    @_parametrize_transaction_testcase
+    def test_not_in_transaction(self) -> None:
+        """
+        No error is raised when not in a transaction.
+        """
+        # No error is raised.
+        assert _durable_example() is True
+
+    @pytest.mark.django_db(transaction=True, databases=[DEFAULT, OTHER])
+    @pytest.mark.parametrize("db_name", [DEFAULT, OTHER])
+    def test_in_manual_transaction_without_testcase_transaction(
+        self, db_name: str
+    ) -> None:
+        """
+        An error is raised when in a transaction without a testcase transaction.
+        """
+        with db.transaction(using=db_name):
+            with pytest.raises(db._UnexpectedOpenTransaction) as exc_info:  # noqa: SLF001
+                _durable_example()
+
+        assert exc_info.value.open_dbs == frozenset({db_name})
+
+    @pytest.mark.parametrize("db_name", [DEFAULT, OTHER])
+    @pytest.mark.django_db(databases=[DEFAULT, OTHER])
+    def test_in_explicit_transaction(self, db_name: str) -> None:
+        """
+        An error is raised when in a transaction in a testcase transaction.
+        """
+        with db.transaction(using=db_name):
+            with pytest.raises(db._UnexpectedOpenTransaction) as exc_info:  # noqa: SLF001
+                _durable_example()
+
+        assert exc_info.value.open_dbs == frozenset({db_name})
+
+    @pytest.mark.django_db(transaction=True, databases=[DEFAULT, OTHER])
+    @pytest.mark.parametrize("db_name", [DEFAULT, OTHER])
+    def test_unclosed_manual_transaction(self, db_name: str) -> None:
+        """
+        Unclosed manual transactions are rolled back with an error.
+        """
+        # An error is raised.
+        with pytest.raises(db._UnexpectedDanglingTransaction) as exc_info:  # noqa: SLF001
+            _create_unclosed_manual_transaction(db_name)
+
+        assert exc_info.value.open_dbs == frozenset({db_name})
+
+        # The transaction has been rolled back.
+        assert db.in_transaction(using=db_name) is False
+
+
+class TestRunAfterCommit:
+    @_parametrize_transaction_testcase
+    def test_outside_transaction_error(self) -> None:
+        """
+        `run_after_commit` should error when asked to execute a callback outside of a transaction.
+
+        See Note [After-commit callbacks require a transaction]
+        """
+        counter = Counter()
+
+        with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
+            db.run_after_commit(counter.increment, using=DEFAULT)
+
+        assert exc.value.database == DEFAULT
+        assert counter.count == 0
+
+    @_parametrize_transaction_testcase
+    @pytest.mark.deprecated_run_after_commit_outside_transaction
+    def test_executes_immediately(self) -> None:
+        """
+        `run_after_commit` executes the callback immediately if there is no transaction...
+
+        ... and if the test is marked with `deprecated_run_after_commit_outside_transaction`.
+
+        See Note [After-commit callbacks require a transaction]
+        """
+        counter = Counter()
+
+        db.run_after_commit(counter.increment)
+
+        assert counter.count == 1
+
+    @_parametrize_transaction_testcase
+    @pytest.mark.parametrize(
+        "transaction_manager",
+        (
+            db.transaction,
+            db.transaction_if_not_already,
+        ),
+    )
+    def test_executes_after_commit(self, transaction_manager: DBContextManager) -> None:
+        """
+        `run_after_commit` should execute the callback when the outermost non-testcase transaction exits.
+
+        This checks that we correctly emulate how after-commit callbacks will be run.
+        """
+        counter = Counter()
+
+        with transaction_manager():
+            db.run_after_commit(counter.increment)
+
+            assert counter.count == 0
+
+        assert counter.count == 1
+
+    @pytest.mark.parametrize(
+        "expects_transaction",
+        (
+            db.savepoint,
+            db.transaction_required,
+        ),
+    )
+    @test.part_of_a_transaction()
+    def test_does_not_execute_without_transaction_with_allow(
+        self, expects_transaction: DBContextManager
+    ) -> None:
+        """
+        `run_after_commit` should not execute the callback when a transaction is not being emulated.
+
+        This checks that we correctly emulate how after-commit callbacks will be run.
+        """
+        counter = Counter()
+
+        with expects_transaction():
+            db.run_after_commit(counter.increment)
+
+            assert counter.count == 0
+
+        assert counter.count == 0
+
+    @_parametrize_transaction_testcase
+    def test_not_executed_if_rolled_back(self) -> None:
+        """
+        `run_after_commit` should not execute the callback when a transaction is rolled back.
+        """
+        counter = Counter()
+
+        try:
+            with db.transaction():
+                db.run_after_commit(counter.increment)
+
+                assert counter.count == 0
+
+                raise _AnError  # noqa: TRY301
+        except _AnError:
+            pass
+
+        assert counter.count == 0
+
+
+class TestRunAfterCommitDeprecatedTestBehaviour:
+    @pytest.mark.deprecated_run_after_commit_outside_transaction
+    def test_does_not_raise_error_when_marked(self) -> None:
+        """
+        No error is raised in test marked with `deprecated_run_after_commit_outside_transaction`.
+
+        Note: this would usually fail because we're enqueuing an after-commit callback without a
+        transaction.
+        """
+        try:
+            db.run_after_commit(object)
+        except Exception:  # noqa: BLE001
+            pytest.fail("An error should not have been raised.")
+
+    @pytest.mark.deprecated_ignore_after_commit_callbacks
+    @pytest.mark.deprecated_run_after_commit_outside_transaction
+    def test_does_not_execute_when_in_testcase_transaction_if_callbacks_disabled(
+        self,
+    ) -> None:
+        """
+        `run_after_commit` should not ignore testcase transactions when test marked with `deprecated_ignore_after_commit_callbacks`.
+
+        Note: this test also requires `deprecated_run_after_commit_outside_transaction`,
+        because otherwise an error would be raised when trying to run the callback.
+        """
+        counter = Counter()
+
+        db.run_after_commit(counter.increment)
+
+        assert counter.count == 0
+
+    @pytest.mark.deprecated_ignore_after_commit_callbacks
+    @pytest.mark.parametrize(
+        "transaction_context",
+        (
+            db.transaction,
+            db.transaction_if_not_already,
+        ),
+    )
+    def test_does_not_execute_after_commit_if_decorated(
+        self, transaction_context: DBContextManager
+    ) -> None:
+        """
+        `run_after_commit` should not execute the callback when test marked with `deprecated_ignore_after_commit_callbacks`.
+        """
+        counter = Counter()
+
+        with transaction_context():
+            db.run_after_commit(counter.increment)
+
+            assert counter.count == 0
+
+        assert counter.count == 0
+
+
+class TestInTransaction:
+    """
+    Tests of `in_transaction`.
+    """
+
+    def test_only_in_testcase_transaction(self) -> None:
+        """
+        We ignore the testcase transaction.
+        """
+        assert db.in_transaction() is False
+
+    @pytest.mark.django_db(transaction=True)
+    def test_not_in_transaction(self) -> None:
+        """
+        When no transaction is open, the state is reported as such.
+        """
+        assert db.in_transaction() is False
+
+    @pytest.mark.django_db(transaction=True, databases=[DEFAULT, OTHER])
+    @pytest.mark.parametrize(
+        "transaction_manager",
+        (
+            django_transaction.atomic,
+            db.transaction,
+            db.transaction_if_not_already,
+        ),
+    )
+    def test_transaction_open_on_other_db(
+        self, transaction_manager: DBContextManager
+    ) -> None:
+        """
+        A transaction on one database does not affect the transaction state of another.
+        """
+        with transaction_manager(using=DEFAULT):
+            assert db.in_transaction(using=OTHER) is False
+
+    @_parametrize_transaction_testcase
+    @pytest.mark.parametrize(
+        "transaction_manager",
+        (
+            django_transaction.atomic,
+            db.transaction,
+            db.transaction_if_not_already,
+        ),
+    )
+    def test_in_explicit_transaction(
+        self, transaction_manager: DBContextManager
+    ) -> None:
+        """
+        Any atomic block is considered a transaction.
+        """
+        with transaction_manager(using=DEFAULT):
+            assert db.in_transaction(using=DEFAULT) is True
+
+    @pytest.mark.django_db(databases=[])
+    def test_database_connection_not_opened(self) -> None:
+        """
+        We don't open a database connection when checking for transaction state.
+        """
+        # Make sure the database connections are closed.
+        for connection in django_db.connections:
+            django_db.connections[connection].close()
+            assert django_db.connections[connection].connection is None
+
+        # Determine the transaction state.
+        for connection in django_db.connections:
+            db.in_transaction(using=connection)
+
+        # We should not have opened a database connection.
+        # Ideally, if this were to fail, we should see an error before this like:
+        #     "Database connections to 'default' are not allowed in this test."
+        # Still, this is closest to what we really care about,
+        # and the "not allowed" errors aren't currently reliable.
+        # See: https://github.com/pytest-dev/pytest-django/issues/1127
+        for connection in django_db.connections:
+            assert django_db.connections[connection].connection is None
+
+
+class TestDBsWithOpenTransaction:
+    def test_testcase_transaction_ignored(self) -> None:
+        """
+        We don't count the testcase transaction as an open transaction.
+        """
+        dbs = db.dbs_with_open_transactions()
+
+        assert dbs == frozenset()
+
+    @pytest.mark.django_db(databases=[DEFAULT, OTHER])
+    def test_transactions_open(self) -> None:
+        """
+        We can detect open transactions.
+        """
+        with (
+            db.transaction(using=DEFAULT),
+            db.transaction(using=OTHER),
+        ):
+            dbs = db.dbs_with_open_transactions()
+
+        assert dbs == frozenset({DEFAULT, OTHER})
+
+    @pytest.mark.django_db(databases=[])
+    def test_database_connection_not_opened(self) -> None:
+        """
+        We don't open a database connection when checking for open transactions.
+        """
+        # Make sure the database connections are closed.
+        for connection in django_db.connections:
+            django_db.connections[connection].close()
+            assert django_db.connections[connection].connection is None
+
+        # Check for open transactions.
+        db.dbs_with_open_transactions()
+
+        # We should not have opened a database connection.
+        # Realistically, if this were to fail, we should see an error before this like:
+        #     "Database connections to 'default' are not allowed in this test."
+        # Still, this is closest to what we really care about,
+        # and the "not allowed" errors aren't currently reliable.
+        # See: https://github.com/pytest-dev/pytest-django/issues/1127
+        for connection in django_db.connections:
+            assert django_db.connections[connection].connection is None
