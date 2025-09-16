@@ -16,3 +16,14 @@ repos:
         # avoid clashes on case-insensitive filesystems
         args: ['-p', '.*[^0-9a-z-_/.=].*']
       - id: trailing-whitespace # Trims trailing whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.0
+    hooks:
+      - id: ruff # Run `ruff` linter
+        name: Check 'ruff linter' passes
+        stages: [pre-commit, pre-push]
+        args: [--fix, --exit-non-zero-on-fix]
+
+      - id: ruff-format # Run `ruff` formatter
+        name: Check 'ruff format' passes

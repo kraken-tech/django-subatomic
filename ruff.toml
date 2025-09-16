@@ -1,0 +1,82 @@
+
+[lint]
+select = ["ALL"]
+ignore = [
+    "ANN002", # Missing type annotation for *{name}
+    "ANN003", # Missing type annotation for **{name}
+    "ANN204", # Missing type annotation for dunder method
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed in {name}
+    "ARG", # flake8-unused-arguments
+    "COM812", # Trailing comma missing
+    "D1", # Missing docstring in {}
+    "D200", # One-line docstring should fit on one line
+    "D203", # 1 blank line required before class docstring
+    "D205", # 1 blank line required between summary line and description
+    "D212", # Multi-line docstring summary should start at the first line
+    "D301", # Use r""" if any backslashes in a docstring
+    "D400", # First line should end with a period
+    "D406", # Section name should end with a newline ("{name}")
+    "D407", # Missing dashed underline after section ("{name}")
+    "D408", # Section underline should be in the line following the section's name ("{name}")
+    "D413", # Missing blank line after last section ("{name}")
+    "D415", # First line should end with a period, question mark, or exclamation point
+    "DJ001", # Avoid using `null=True` on string-based fields such as `CharField`
+    "DJ008", # Model does not define `__str__` method
+    "E501", # Line too long
+    "EM", # flake8-errmsg
+    "ERA001", # Found commented-out code
+    "FIX", # flake8-fixme
+    "N818", # Exception name `...` should be named with an Error suffix
+    "PLC0414", # Import alias does not rename original package
+    "PLR0904", # Too many public methods (x > 20)
+    "PLR0911", # Too many return statements (x > 6)
+    "PLR0912", # Too many branches (x > 12)
+    "PLR0913", # Too many arguments to function call (x > 5)
+    "PLR2004", # Magic value used in comparison, consider replacing 4 with a constant variable
+    "PLR5501", # Use `elif` instead of `else` then `if`, to reduce indentation
+    "PLR6301", # Method `foo` could be a function or static method
+    "PT007",  # Wrong values type in `pytest.mark.parametrize` expected `list` of `tuple`
+    "PYI041", # Use `float` instead of `int | float`
+    "RET505", # Unnecessary `else` after `return` statement
+    "RUF001", # String contains ambiguous `’` (RIGHT SINGLE QUOTATION MARK). Did you mean ``` (GRAVE ACCENT)?
+    "S101",  # Use of `assert` detected
+    "S311",  # Standard pseudo-random generators are not suitable for cryptographic purposes
+    "SIM102",  # Use a single `if` statement instead of nested `if` statements
+    "SIM108",  # Use ternary operator ... instead of `if`-`else`-block
+    "SIM117",  # Use a single `with` statement with multiple contexts instead of nested `with` statements
+    "SIM910",  # Use `{"foo": "bar"}.get(value)` instead of `{"foo": "bar"}.get(value, None)`
+    "TD002", # Missing author in TODO
+    "TD003", # Missing issue link on the line following this TODO
+    "TID252",  # Prefer absolute imports over relative imports from parent modules
+    "TRY003", # Avoid specifying long messages outside the exception class
+    # The following rules may cause conflicts when used with the formatter: `...`. To avoid
+    # unexpected behavior, we recommend disabling these rules, either by removing them from the
+    # `select` or `extend-select` configuration, or adding them to the `ignore` configuration.
+    "ISC001",  # Implicitly concatenated string literals on one line
+]
+
+[lint.per-file-ignores]
+# Allow unused imports in `__init__.py` files as these are convenience imports.
+"__init__.py" = [ "F401" ]
+
+"tests/**" = [
+    "ANN", # Type hints
+    "FBT001",  # Boolean-typed positional argument in function definition
+]
+
+[lint.isort]
+lines-after-imports = 2
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "project",
+    "local-folder",
+]
+
+[lint.isort.sections]
+"project" = [
+    "django_subatomic",
+    "tests",
+]
