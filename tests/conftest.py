@@ -21,5 +21,8 @@ def django_db_modify_db_settings_tox_suffix() -> None:
     fixtures.skip_if_no_django()  # type: ignore[attr-defined]
 
     tox_environment = os.getenv("TOX_ENV_NAME")
-    if tox_environment:
+
+    # We only measure coverage when running tests with tox,
+    # so coverage never sees the path where "if tox_environment" is false.
+    if tox_environment:  # pragma: no branch
         fixtures._set_suffix_to_test_databases(suffix=tox_environment)  # noqa: SLF001
