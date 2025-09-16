@@ -25,6 +25,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"django_subatomic" = ["py.typed"]
 
 # Development
 # -----------
@@ -34,8 +36,14 @@ default-groups = []
 
 [dependency-groups]
 dev = [
+    {include-group = "mypy"},
     {include-group = "test_runners"},
     {include-group = "python_tests"},
+]
+mypy = [
+    {include-group = "python_tests"},
+    "django-stubs[compatible-mypy]",
+    "mypy",
 ]
 test_runners = [
     # Test matrix management
@@ -48,3 +56,15 @@ python_tests = [
     # Python test suite
     "pytest",
 ]
+
+# Mypy
+# ----
+
+[tool.mypy]
+files = "."
+exclude = "build/"
+
+# Use strict defaults
+strict = true
+warn_unreachable = true
+warn_no_return = true
