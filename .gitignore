@@ -1,0 +1,25 @@
+# Python byte-code
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.whl
+
+# Linting
+.mypy_cache/
+.import_linter_cache/
+
+# Testing
+.pytest_cache/
+
+# Environments
+.venv/
+.direnv/
+.envrc
+uv.lock
+
+# Environment variables
+.env
