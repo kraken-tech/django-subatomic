@@ -35,8 +35,13 @@ default-groups = []
 [dependency-groups]
 dev = [
     {include-group = "test_runners"},
+    {include-group = "python_tests"},
 ]
 test_runners = [
     # Pre-commit checks
     "pre-commit",
+]
+python_tests = [
+    # Python test suite
+    "pytest",
 ]
