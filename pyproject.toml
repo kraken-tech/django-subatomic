@@ -38,6 +38,9 @@ dev = [
     {include-group = "python_tests"},
 ]
 test_runners = [
+    # Test matrix management
+    "tox",
+
     # Pre-commit checks
     "pre-commit",
 ]
