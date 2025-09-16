@@ -50,6 +50,7 @@ mypy = [
 test_runners = [
     # Test matrix management
     "tox",
+    "tox-uv",
 
     # Pre-commit checks
     "pre-commit",
