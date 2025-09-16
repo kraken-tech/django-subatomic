@@ -1,0 +1,50 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Only allow one instance of this workflow for each PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v5
+    - uses: actions/setup-python@v6
+      with:
+        python-version: |
+          3.12
+          3.13
+        cache: 'pip'
+        cache-dependency-path: |
+          pyproject.toml
+          tox.ini
+    - run: pip install --group test_runners
+
+    - run: tox run-parallel --parallel-no-spinner
+      env:
+        FORCE_COLOR: "1"
+        DEFAULT_DATABASE_URL: postgres://postgres:postgres@localhost/subatomic
+        OTHER_DATABASE_URL: postgres://postgres:postgres@localhost/subatomic_other
+
+    - run: pre-commit run --all-files
