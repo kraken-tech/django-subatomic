@@ -7,6 +7,7 @@ from unittest import mock
 import pytest
 from django import db as django_db
 from django.db import transaction as django_transaction
+from django.test import override_settings
 
 from django_subatomic import db, test
 
@@ -57,32 +58,6 @@ def _parametrize_transaction_testcase(func: Callable[..., None]) -> MarkDecorato
     usefixtures = pytest.mark.usefixtures("_is_transaction_testcase")
 
     return parametrize(usefixtures(func))  # type: ignore[no-any-return]
-
-
-@pytest.fixture(autouse=True)
-def _require_transactions_for_after_commit_callbacks(
-    request: pytest.FixtureRequest,
-) -> Generator[None]:
-    """
-    Ensure after-commit callbacks are executed from within a transaction.
-
-    This ensures that we do not accidentally write code which looks like it defers execution,
-    but is actually running immediately.
-
-    This fixture enables that new behaviour for all new tests by default,
-    but offers an escape-hatch for tests which have not yet been fixed.
-
-    TODO: Allow users of this library to do this in their own tests.
-
-    See Note [After-commit callbacks require a transaction].
-    """
-    if "deprecated_run_after_commit_outside_transaction" in request.keywords:
-        with mock.patch.object(
-            db, "_REQUIRE_TRANSACTION_FOR_AFTER_COMMIT_CALLBACKS", new=False
-        ):
-            yield
-    else:
-        yield
 
 
 @pytest.fixture(autouse=True)
@@ -387,6 +362,10 @@ class TestDurable:
 
 
 class TestRunAfterCommit:
+    """
+    Tests for `run_after_commit`.
+    """
+
     @_parametrize_transaction_testcase
     def test_outside_transaction_error(self) -> None:
         """
@@ -403,18 +382,16 @@ class TestRunAfterCommit:
         assert counter.count == 0
 
     @_parametrize_transaction_testcase
-    @pytest.mark.deprecated_run_after_commit_outside_transaction
-    def test_executes_immediately(self) -> None:
+    def test_transaction_check_can_be_disabled(self) -> None:
         """
-        `run_after_commit` executes the callback immediately if there is no transaction...
-
-        ... and if the test is marked with `deprecated_run_after_commit_outside_transaction`.
+        Callbacks run immediately if there is no transaction and `SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION` is False.
 
         See Note [After-commit callbacks require a transaction]
         """
         counter = Counter()
 
-        db.run_after_commit(counter.increment)
+        with override_settings(SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION=False):
+            db.run_after_commit(counter.increment)
 
         assert counter.count == 1
 
@@ -488,15 +465,15 @@ class TestRunAfterCommit:
 
 class TestRunAfterCommitDeprecatedTestBehaviour:
     @pytest.mark.deprecated_ignore_after_commit_callbacks
-    @pytest.mark.deprecated_run_after_commit_outside_transaction
+    @override_settings(SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION=False)
     def test_does_not_execute_when_in_testcase_transaction_if_callbacks_disabled(
         self,
     ) -> None:
         """
         `run_after_commit` should not ignore testcase transactions when test marked with `deprecated_ignore_after_commit_callbacks`.
 
-        Note: this test also requires `deprecated_run_after_commit_outside_transaction`,
-        because otherwise an error would be raised when trying to run the callback.
+        We have to disable `SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION`, because
+        otherwise an error would be raised when trying to register the callback.
         """
         counter = Counter()
 

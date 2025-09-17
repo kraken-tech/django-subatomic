@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import attrs
 from django import db as django_db
+from django.conf import settings
 from django.db import transaction as django_transaction
 
 
@@ -14,8 +15,6 @@ if TYPE_CHECKING:
     from typing import NoReturn
 
 
-# See Note [After-commit callbacks require a transaction]
-_REQUIRE_TRANSACTION_FOR_AFTER_COMMIT_CALLBACKS = True
 # See Note [Running after-commit callbacks in tests]
 _RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS = True
 
@@ -323,6 +322,9 @@ class _UnexpectedDanglingTransaction(Exception):
 # We choose to disallow immediate execution because it can be misleading and hide bugs.
 # In particular, it can hide the fact that a transaction is missing or on a different database,
 # which can make code read as though a callback will be deferred when it won't be.
+#
+# To help projects migrate to this behaviour, this requirement can be disabled with
+# the Django setting `SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION`.
 
 
 # Note [Running after-commit callbacks in tests]
@@ -354,7 +356,10 @@ def run_after_commit(
     if using is None:
         using = django_db.DEFAULT_DB_ALIAS
 
-    needs_transaction = _REQUIRE_TRANSACTION_FOR_AFTER_COMMIT_CALLBACKS
+    # See Note [After-commit callbacks require a transaction]
+    needs_transaction = getattr(
+        settings, "SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION", True
+    )
     only_in_testcase_transaction = _innermost_atomic_block_wraps_testcase(using=using)
 
     # Fail if a transaction is required, but none exists.
