@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 from typing import TYPE_CHECKING
-from unittest import mock
 
 import pytest
 from django import db as django_db
@@ -14,7 +13,7 @@ from django_subatomic import db, test
 
 if TYPE_CHECKING:
     import contextlib
-    from collections.abc import Callable, Generator
+    from collections.abc import Callable
     from typing import Protocol
 
     import pytest_django
@@ -58,28 +57,6 @@ def _parametrize_transaction_testcase(func: Callable[..., None]) -> MarkDecorato
     usefixtures = pytest.mark.usefixtures("_is_transaction_testcase")
 
     return parametrize(usefixtures(func))  # type: ignore[no-any-return]
-
-
-@pytest.fixture(autouse=True)
-def _prevent_after_commit_callbacks(
-    request: pytest.FixtureRequest,
-) -> Generator[None, None, None]:
-    """
-    Disable automatically running after-commit callbacks in marked tests.
-
-    If a test relies on after-commit callbacks never being called, it may be
-    marked with `deprecated_ignore_after_commit_callbacks` to disable test simulation
-    of how after-commit callbacks are naturally run after transactions.
-
-    TODO: Allow users of this library to do this in their own tests.
-
-    See Note [Running after-commit callbacks in tests]
-    """
-    if "deprecated_ignore_after_commit_callbacks" in request.keywords:
-        with mock.patch.object(db, "_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", new=False):
-            yield
-    else:
-        yield
 
 
 class Counter:
@@ -463,25 +440,24 @@ class TestRunAfterCommit:
         assert counter.count == 0
 
 
-class TestRunAfterCommitDeprecatedTestBehaviour:
-    @pytest.mark.deprecated_ignore_after_commit_callbacks
+class TestRunAfterCommitCallbacksSettingBehaviour:
     @override_settings(SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION=False)
     def test_does_not_execute_when_in_testcase_transaction_if_callbacks_disabled(
         self,
     ) -> None:
         """
-        `run_after_commit` should not ignore testcase transactions when test marked with `deprecated_ignore_after_commit_callbacks`.
+        `run_after_commit` should not ignore testcase transactions when SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS is False.
 
         We have to disable `SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION`, because
         otherwise an error would be raised when trying to register the callback.
         """
         counter = Counter()
 
-        db.run_after_commit(counter.increment)
+        with override_settings(SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS=False):
+            db.run_after_commit(counter.increment)
 
         assert counter.count == 0
 
-    @pytest.mark.deprecated_ignore_after_commit_callbacks
     @pytest.mark.parametrize(
         "transaction_context",
         (
@@ -493,16 +469,17 @@ class TestRunAfterCommitDeprecatedTestBehaviour:
         self, transaction_context: DBContextManager
     ) -> None:
         """
-        `run_after_commit` should not execute the callback when test marked with `deprecated_ignore_after_commit_callbacks`.
+        `run_after_commit` should not execute the callback when SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS is False.
         """
         counter = Counter()
 
-        with transaction_context():
-            db.run_after_commit(counter.increment)
+        with override_settings(SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS=False):
+            with transaction_context():
+                db.run_after_commit(counter.increment)
+
+                assert counter.count == 0
 
             assert counter.count == 0
-
-        assert counter.count == 0
 
 
 class TestInTransaction:
