@@ -48,3 +48,5 @@ jobs:
         OTHER_DATABASE_URL: postgres://postgres:postgres@localhost/subatomic_other
 
     - run: pre-commit run --all-files
+      env:
+        SKIP: no-commit-to-branch
