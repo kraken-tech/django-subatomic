@@ -27,3 +27,5 @@ repos:
 
       - id: ruff-format # Run `ruff` formatter
         name: Check 'ruff format' passes
+ci:
+  autofix_prs: false
