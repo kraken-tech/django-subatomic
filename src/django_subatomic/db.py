@@ -15,10 +15,6 @@ if TYPE_CHECKING:
     from typing import NoReturn
 
 
-# See Note [Running after-commit callbacks in tests]
-_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS = True
-
-
 def dbs_with_open_transactions() -> frozenset[str]:
     """
     Get the names of databases with open transactions.
@@ -224,7 +220,8 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Iterator[
     """
     yield
     if (
-        _RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS  # See Note [Running after-commit callbacks in tests]
+        # See Note [Running after-commit callbacks in tests]
+        getattr(settings, "SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", True)
         and _innermost_atomic_block_wraps_testcase(using=using)
     ):
         connection = django_transaction.get_connection(using)
@@ -335,6 +332,9 @@ class _UnexpectedDanglingTransaction(Exception):
 # To avoid that problem, we capture after-commit callbacks and execute them when we exit the
 # outermost `transaction` or `transaction_if_not_already` context. This emulates how the application
 # will behave when deployed and means that our tests are testing realistic application behaviour.
+#
+# To help projects migrate to this behaviour, it can be disabled with
+# the Django setting `SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS`.
 
 
 def run_after_commit(
@@ -368,8 +368,11 @@ def run_after_commit(
     if needs_transaction and not in_transaction(using=using):
         raise _MissingRequiredTransaction(database=using)
 
-    # See Note [Running after-commit callbacks in tests]
-    if _RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS and only_in_testcase_transaction:
+    if (
+        # See Note [Running after-commit callbacks in tests]
+        getattr(settings, "SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", True)
+        and only_in_testcase_transaction
+    ):
         callback()
     else:
         django_transaction.on_commit(callback, using=using)
