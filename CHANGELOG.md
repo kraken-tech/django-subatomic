@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Project created.
+## [0.1.0] - 2025-09-17
+
+The first release of django-subatomic.
 
 [Unreleased]: https://github.com/kraken-tech/django-subatomic/commits/HEAD
