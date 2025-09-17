@@ -35,6 +35,8 @@ jobs:
         python-version: |
           3.12
           3.13
+          3.14
+        allow-prereleases: true
         cache: 'pip'
         cache-dependency-path: |
           pyproject.toml
