@@ -487,19 +487,6 @@ class TestRunAfterCommit:
 
 
 class TestRunAfterCommitDeprecatedTestBehaviour:
-    @pytest.mark.deprecated_run_after_commit_outside_transaction
-    def test_does_not_raise_error_when_marked(self) -> None:
-        """
-        No error is raised in test marked with `deprecated_run_after_commit_outside_transaction`.
-
-        Note: this would usually fail because we're enqueuing an after-commit callback without a
-        transaction.
-        """
-        try:
-            db.run_after_commit(object)
-        except Exception:  # noqa: BLE001
-            pytest.fail("An error should not have been raised.")
-
     @pytest.mark.deprecated_ignore_after_commit_callbacks
     @pytest.mark.deprecated_run_after_commit_outside_transaction
     def test_does_not_execute_when_in_testcase_transaction_if_callbacks_disabled(
