@@ -65,6 +65,7 @@ dev = [
     {include-group = "mypy"},
     {include-group = "test_runners"},
     {include-group = "python_tests"},
+    "pre-commit",
 ]
 mypy = [
     {include-group = "python_tests"},
@@ -75,9 +76,6 @@ test_runners = [
     # Test matrix management
     "tox",
     "tox-uv",
-
-    # Pre-commit checks
-    "pre-commit",
 ]
 python_tests = [
     # Python test suite
