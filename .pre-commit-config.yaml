@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files # Prevent giant files from being committed
       - id: check-case-conflict # Checks for files that conflict in case-insensitive filesystems
