@@ -62,10 +62,14 @@ default-groups = []
 
 [dependency-groups]
 dev = [
+    {include-group = "docs"},
     {include-group = "mypy"},
     {include-group = "test_runners"},
     {include-group = "python_tests"},
     "pre-commit",
+]
+docs = [
+    "mkdocs-material",
 ]
 mypy = [
     {include-group = "python_tests"},
