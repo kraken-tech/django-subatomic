@@ -7,9 +7,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-09-20
+
 ### Added
 
 - Verified compatibility with Python3.14.
+- Minimal documentation.
+  N.B. These docs are incomplete.
+  More comprehensive documentation
+  covering the usage of this library
+  and guidance for migrating to it,
+  will be published soon.
 
 ## [0.1.0] - 2025-09-17
 
