@@ -3,3 +3,11 @@ repo_name: kraken-tech/django-subatomic
 repo_url: https://github.com/kraken-tech/django-subatomic
 theme:
   name: material
+extra:
+  version:
+    provider: mike
+    alias: true
+    default:
+      - latest
+plugins:
+  - mike

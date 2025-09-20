@@ -1,0 +1,27 @@
+name: build release docs
+on:
+  release:
+    types: [published]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.13
+      - name: Install Dependencies
+        run: |
+          pip install --group docs
+      - name: Configure git
+        run: |
+          git config --global user.name "GitHub docs action"
+          git config --global user.email "django-subatomic+docs@example.com"
+      - name: Build Docs Site
+        run: |
+          mike deploy --push --update-aliases ${{ github.event.release.tag_name }} latest
+          mike set-default latest --push
