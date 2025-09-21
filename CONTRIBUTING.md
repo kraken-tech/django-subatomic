@@ -89,5 +89,34 @@ Python dependencies are declared in `pyproject.toml`.
 - _package_ dependencies in the `dependencies` array in the `[project]` section.
 - _development_ dependencies in the `[dependency-groups]` section.
 
+## Docs
+
+Our documentation lives in the `docs/` directory.
+It is written in Markdown, and built with [MkDocs].
+We use the [Material for MkDocs] theme.
+Every time we merge or make a release,
+a GitHub Action runs [Mike],
+which commits a new version of the docs to the `gh-pages` branch
+so that it is deployed to [GitHub Pages].
+
+To build the docs locally, you will need the "docs" dependency-group installed
+(if you have already installed the "dev" group, you can skip this):
+
+```
+pip install --group docs
+```
+
+Once you have the dependencies installed,
+you can serve the docs locally with:
+
+```
+mkdocs serve
+```
+
+
+[GitHub Pages]: https://pages.github.com/
+[Material for MkDocs]: https://squidfunk.github.io/mkdocs-material/
+[Mike]: https://github.com/jimporter/mike
+[MkDocs]: https://www.mkdocs.org/
 [keepachangelog]: https://keepachangelog.com/
 [semver]: https://semver.org/
