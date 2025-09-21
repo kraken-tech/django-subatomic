@@ -89,5 +89,5 @@ Python dependencies are declared in `pyproject.toml`.
 - _package_ dependencies in the `dependencies` array in the `[project]` section.
 - _development_ dependencies in the `[dependency-groups]` section.
 
-[semver]: https://semver.org/
 [keepachangelog]: https://keepachangelog.com/
+[semver]: https://semver.org/
