@@ -3,6 +3,29 @@ repo_name: kraken-tech/django-subatomic
 repo_url: https://github.com/kraken-tech/django-subatomic
 theme:
   name: material
+  palette:
+
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: kraken
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+extra_css:
+  - static/css/theme.css
 extra:
   version:
     provider: mike

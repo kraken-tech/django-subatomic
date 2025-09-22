@@ -1,0 +1,13 @@
+[data-md-color-scheme="kraken"] {
+  color-scheme: light;
+
+  --md-primary-fg-color: #180048;
+
+  --md-accent-fg-color: #F050F8;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #180048;
+
+  --md-accent-fg-color: #F050F8;
+}
