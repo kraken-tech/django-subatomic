@@ -14,8 +14,10 @@ dist/
 
 # Testing
 .pytest_cache/
+.tox/
 
 # Environments
+.python-version
 .venv/
 .direnv/
 .envrc
