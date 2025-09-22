@@ -3,7 +3,7 @@ repo_name: kraken-tech/django-subatomic
 repo_url: https://github.com/kraken-tech/django-subatomic
 theme:
   name: material
-  logo: site/img/logo.png
+  logo: static/img/logo.png
   palette:
 
     # Palette toggle for automatic mode
