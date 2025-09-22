@@ -10,4 +10,5 @@ extra:
     default:
       - latest
 plugins:
+  - search
   - mike
