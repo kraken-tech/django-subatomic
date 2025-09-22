@@ -25,3 +25,6 @@ uv.lock
 
 # Environment variables
 .env
+
+# Docs build
+site/
