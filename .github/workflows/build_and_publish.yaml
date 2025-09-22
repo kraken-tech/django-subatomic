@@ -41,7 +41,7 @@ jobs:
     - name: check changelog includes version
       run: grep '## \[${{ steps.package_version.outputs.version }}\]' < CHANGELOG.md
 
-  publish:
+  pypi:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
@@ -62,7 +62,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
 
-    needs: [publish]
+    needs: [pypi]
     if: github.repository_owner == 'kraken-tech' && github.ref_type == 'tag'
 
     permissions:
