@@ -48,3 +48,15 @@ jobs:
         FORCE_COLOR: "1"
         DEFAULT_DATABASE_URL: postgres://postgres:postgres@localhost/subatomic
         OTHER_DATABASE_URL: postgres://postgres:postgres@localhost/subatomic_other
+
+  docs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+    - uses: actions/checkout@v5
+    - uses: actions/setup-python@v6
+      with:
+        python-version-file: '.github/workflows/.python-version'
+    - run: pip install --group docs
+    - run: mkdocs build --strict
