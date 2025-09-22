@@ -25,6 +25,12 @@ pip install --group dev --editable .
 ```
 *The `--group` flag requires a minimum pip version of 25.1*
 
+Install the pre-commit hooks so they run automatically on git commit:
+
+```sh
+pre-commit install
+```
+
 ### Testing (full requirements matrix)
 
 To test against multiple Python (and package) versions, we need to:
