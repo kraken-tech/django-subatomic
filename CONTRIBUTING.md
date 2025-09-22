@@ -24,6 +24,12 @@ install Python requirements and pre-commit:
 pip install --group dev --editable .
 ```
 
+Install the pre-commit hooks so they run automatically on git commit:
+
+```sh
+pre-commit install
+```
+
 ### Testing (full requirements matrix)
 
 To test against multiple Python (and package) versions, we need to:
