@@ -9,7 +9,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Seach plugin for MkDocs
+- Search plugin for MkDocs
 
 ## [0.1.1] - 2025-09-20
 
