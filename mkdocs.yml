@@ -13,7 +13,7 @@ theme:
 
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
-      scheme: default
+      scheme: kraken
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
@@ -24,6 +24,8 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to system preference
+extra_css:
+  - static/css/theme.css
 extra:
   version:
     provider: mike
