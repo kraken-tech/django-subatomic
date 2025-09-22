@@ -58,5 +58,5 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         python-version-file: '.github/workflows/.python-version'
-    - run: pip install --group docs
+    - run: pip install --group docs .
     - run: mkdocs build --strict

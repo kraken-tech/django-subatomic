@@ -4,6 +4,8 @@ repo_url: https://github.com/kraken-tech/django-subatomic
 theme:
   name: material
   logo: static/img/logo.png
+  features:
+    - navigation.indexes
   palette:
 
     # Palette toggle for automatic mode
@@ -36,5 +38,8 @@ extra:
 markdown_extensions:
   - tables
 plugins:
+  - mkdocstrings
+  - api-autonav:
+      modules: ['src/django_subatomic']
   - search
   - mike

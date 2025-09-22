@@ -70,6 +70,7 @@ dev = [
 ]
 docs = [
     "mike",
+    "mkdocs-api-autonav",
     "mkdocs-material>=9.5.0",
 ]
 mypy = [
