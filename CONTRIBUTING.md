@@ -23,6 +23,7 @@ install Python requirements and pre-commit:
 ```sh
 pip install --group dev --editable .
 ```
+*The `--group` flag requires a minimum pip version of 25.1*
 
 ### Testing (full requirements matrix)
 
