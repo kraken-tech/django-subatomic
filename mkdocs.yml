@@ -33,6 +33,8 @@ extra:
     alias: true
     default:
       - latest
+markdown_extensions:
+  - tables
 plugins:
   - search
   - mike
