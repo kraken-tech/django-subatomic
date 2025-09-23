@@ -28,7 +28,7 @@ repos:
       - id: ruff-format # Run `ruff` formatter
         name: Check 'ruff format' passes
 
-  - repo: https://github.com/shssoichiro/oxipng
+  - repo: https://github.com/oxipng/oxipng
     rev: v9.1.5
     hooks:
       - id: oxipng
