@@ -17,7 +17,7 @@ jobs:
           python-version-file: '.github/workflows/.python-version'
       - name: Install Dependencies
         run: |
-          pip install --group docs
+          pip install --group docs .
       - name: Configure git
         run: |
           git config --global user.name "GitHub docs action"

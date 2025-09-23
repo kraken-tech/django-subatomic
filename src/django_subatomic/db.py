@@ -41,10 +41,10 @@ def durable[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     and that no transaction is left open when the function completes.
 
     Raises:
-        - _UnexpectedOpenTransaction: if a transaction is already open when this is called.
-
-        - _UnexpectedDanglingTransaction: if a transaction remains open after the decorated
-          function exits. Before raising this exeption, we roll back and end the transaction.
+        _UnexpectedOpenTransaction: if a transaction is already open when this is called.
+        _UnexpectedDanglingTransaction: if a transaction remains open after the decorated
+            function exits. Before raising this exeption, we roll back and end the
+            transaction.
     """
 
     @functools.wraps(func)
@@ -82,7 +82,7 @@ def transaction_required(*, using: str | None = None) -> Iterator[None]:
     See Note [_MissingRequiredTransaction in tests]
 
     Raises:
-        - _MissingRequiredTransaction: if we are not in a transaction.
+        _MissingRequiredTransaction: if we are not in a transaction.
     """
     if using is None:
         using = django_db.DEFAULT_DB_ALIAS
@@ -103,7 +103,7 @@ def transaction(*, using: str | None = None) -> Iterator[None]:
     This wraps Django's 'atomic' function.
 
     Raises:
-        - RuntimeError: if we call this from inside another existing transaction.
+        RuntimeError: if we call this from inside another existing transaction.
     """
     # Note that `savepoint=False` is not required here because
     # the `savepoint` flag is ignored when `durable` is `True`.
@@ -121,7 +121,7 @@ def transaction_if_not_already(*, using: str | None = None) -> Iterator[None]:
 
     Use of this hints at code which lacks control over the state it's called in.
 
-    Suggested altertnatives:
+    Suggested alternatives:
 
     - In functions which should not control transactions, use `transaction_required`.
       This ensures they are handled by the caller.
@@ -194,8 +194,8 @@ def savepoint(*, using: str | None = None) -> Generator[None, None, None]:
       deliberately does not work as one.
 
     Raises:
-        - _MissingRequiredTransaction: if we are not in a transaction
-          See Note [_MissingRequiredTransaction in tests]
+        _MissingRequiredTransaction: if we are not in a transaction
+            See Note [_MissingRequiredTransaction in tests]
     """
     with (
         transaction_required(using=using),
