@@ -121,7 +121,7 @@ def transaction_if_not_already(*, using: str | None = None) -> Iterator[None]:
 
     Use of this hints at code which lacks control over the state it's called in.
 
-    Suggested altertnatives:
+    Suggested alternatives:
 
     - In functions which should not control transactions, use `transaction_required`.
       This ensures they are handled by the caller.
