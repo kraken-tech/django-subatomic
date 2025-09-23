@@ -37,6 +37,8 @@ extra:
       - latest
 markdown_extensions:
   - tables
+  - toc:
+      permalink: true
 plugins:
   - mkdocstrings
   - api-autonav:
