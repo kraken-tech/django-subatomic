@@ -13,7 +13,7 @@ Specifically, the **Behaviours** which `atomic` exhibits are:
 | `savepoint=`         | `durable=False` (default) | `durable=True` |
 | ---                  | ---                       | ---            |
 | **`True` (default)** | **A**. Begin a transaction if needed. Creates a savepoint if already in a transaction. | **B**. Begin a transaction, or throw an error if one is already open. Never creates a savepoint. (The `savepoint=` flag is ignored.) |
-| **`False`**          | **C**. Begin a transaction if needed. Never creates a savepoint. | **D**. Same as **B**.  |
+| **`False`**          | **C**. Begin a transaction if needed. Never creates a savepoint. | Same as **B**.  |
 
 ## Outcomes
 
