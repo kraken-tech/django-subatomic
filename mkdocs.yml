@@ -36,7 +36,10 @@ extra:
     default:
       - latest
 markdown_extensions:
+  - admonition
   - tables
+  - toc:
+      permalink: true
 plugins:
   - mkdocstrings:
       handlers:
