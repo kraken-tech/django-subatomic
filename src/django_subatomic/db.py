@@ -98,7 +98,7 @@ def transaction(*, using: str | None = None) -> Iterator[None]:
     Create a database transaction.
 
     Nested calls are not allowed because SQL does not support nested transactions.
-    Consider this like `atomic(durable=True)`, but with added after-commit callback support in tests.
+    Consider this like Django's `atomic(durable=True)`, but with added after-commit callback support in tests.
 
     This wraps Django's 'atomic' function.
 
@@ -190,7 +190,7 @@ def savepoint(*, using: str | None = None) -> Generator[None, None, None]:
       continuing with your transaction. If your intention is to ensure that
       your code is committed atomically, consider using `transaction_required`
       instead.
-    - Savepoint rollback should be handled _where we create the savepoint_.
+    - We believe savepoint rollback should be handled where the savepoint is created.
       That locality is not possible with a decorator, so this function
       deliberately does not work as one.
 
