@@ -38,7 +38,11 @@ extra:
 markdown_extensions:
   - tables
 plugins:
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            members_order: source
   - api-autonav:
       modules: ['src/django_subatomic']
   - search
