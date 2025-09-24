@@ -237,7 +237,7 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Iterator[
 # we need to permit the test-suite's transaction.
 
 
-@attrs.frozen(kw_only=True)
+@attrs.frozen
 class _MissingRequiredTransaction(Exception):
     """
     Raised by `transaction_required` when we're not in a transaction.
