@@ -642,12 +642,18 @@
 <p>Django's atomic creates many savepoints that are never used. There are a couple of main causes:</p>
 <ol>
 <li>Savepoints are created with decorators (<code>@atomic</code>).</li>
-<li><code>atomic</code> creates savepoints by default. The default arguments (<em>Behaviour</em> <strong>A</strong>) are an <a href="https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html">attractive nuisance</a> because they make us create savepoints when we don't need them.
-    &gt; … if you have two ways to accomplish a task and one is a simple way that <em>looks</em> like the right thing but is subtly wrong, and the other is correct but
-    &gt; more complicated, the majority of people will end up doing the wrong
-    &gt; thing.
-    &gt; — <a href="https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html"><strong>Attractive nuisances in software design</strong></a> - <a href="https://blog.ganssle.io/author/paul-ganssle.html">Paul Ganssle</a></li>
-<li>We have no easy way to indicate the creation of a savepoint that doesn't have the potential to create a transaction instead. The only tool we have to create a savepoint is <em>Behaviour</em> <strong>A</strong>, which can create a transaction.</li>
+<li>
+<p><code>atomic</code> creates savepoints by default. The default arguments (<em>Behaviour</em> <strong>A</strong>) are an <a href="https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html">attractive nuisance</a> because they make us create savepoints when we don't need them.</p>
+<blockquote>
+<p>… if you have two ways to accomplish a task and one is a simple way that <em>looks</em> like the right thing but is subtly wrong, and the other is correct but
+more complicated, the majority of people will end up doing the wrong
+thing.
+— <a href="https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html"><strong>Attractive nuisances in software design</strong></a> - <a href="https://blog.ganssle.io/author/paul-ganssle.html">Paul Ganssle</a></p>
+</blockquote>
+</li>
+<li>
+<p>We have no easy way to indicate the creation of a savepoint that doesn't have the potential to create a transaction instead. The only tool we have to create a savepoint is <em>Behaviour</em> <strong>A</strong>, which can create a transaction.</p>
+</li>
 </ol>
 <h2 id="what-subatomic-implements">What Subatomic implements</h2>
 <ul>
