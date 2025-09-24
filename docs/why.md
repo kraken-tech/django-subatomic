@@ -17,11 +17,16 @@ Specifically, the **Behaviours** which `atomic` exhibits are:
 
 ## Outcomes
 
-Uses of `atomic` fall into three broad **Categories**:
+When people use `atomic`,
+they're generally trying to achieve one of three **Outcomes**:
 
-1. Create a *transaction* to wrap multiple changes.
-2. Create a *savepoint* so we can roll back to in order to continue with a transaction after failure.
-3. Changes to be committed *atomically*, but not specific about where the transaction is created, as long as there is one.
+1. to create a *transaction*
+   which will commit multiple changes atomically.
+2. to create a *savepoint*
+   so we can roll back to in order to continue with a transaction after failure.
+3. to indicate that changes should be committed atomically,
+   without needing to be specific about the scope of the transaction,
+   as long as there is one.
 
 ## Problems
 
