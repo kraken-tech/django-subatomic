@@ -11,6 +11,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Search plugin for MkDocs
 
+### Removed
+
+- `django_subatomic.db.NotADecorator` is no longer a part of the public API.
+  It has been renamed to `_NotADecorator`.
+  This implementation detail was not intended for general use,
+  and may be removed in a future release.
+
 ## [0.1.1] - 2025-09-20
 
 ### Added

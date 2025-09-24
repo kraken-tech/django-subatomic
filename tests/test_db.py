@@ -202,7 +202,7 @@ class TestSavepointContextManager:
         """
         `savepoint` cannot be used as a decorator.
         """
-        with pytest.raises(db.NotADecorator):
+        with pytest.raises(db._NotADecorator):  # noqa: SLF001
 
             @db.savepoint()
             def inner() -> None: ...

@@ -140,7 +140,7 @@ def transaction_if_not_already(*, using: str | None = None) -> Iterator[None]:
         yield
 
 
-class NotADecorator(Exception):
+class _NotADecorator(Exception):
     """
     Raised when a context manager is mistakenly used as a decorator.
     """
@@ -157,7 +157,7 @@ class _NonDecoratorContextManager[T_Co](contextlib._GeneratorContextManager[T_Co
     """
 
     def __call__(self, func: object) -> NoReturn:
-        raise NotADecorator
+        raise _NotADecorator
 
 
 def _contextmanager_without_decorator[**P, T_Co](
