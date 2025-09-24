@@ -38,7 +38,14 @@ extra:
 markdown_extensions:
   - tables
 plugins:
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+            show_signature_type_parameters: true
   - api-autonav:
       modules: ['src/django_subatomic']
   - search

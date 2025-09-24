@@ -15,90 +15,13 @@ if TYPE_CHECKING:
     from typing import NoReturn
 
 
-def dbs_with_open_transactions() -> frozenset[str]:
-    """
-    Get the names of databases with open transactions.
-    """
-    dbs_with_open_transaction = set()
-    # Note: django_db.connections is a special class which implements __iter__,
-    # and should not be confused with a list or dict.
-    for db_alias in django_db.connections:
-        if in_transaction(using=db_alias):
-            dbs_with_open_transaction.add(db_alias)
-
-    return frozenset(dbs_with_open_transaction)
-
-
-def durable[**P, R](func: Callable[P, R]) -> Callable[P, R]:
-    """
-    Enforce durability with this decorator.
-
-    "Durability" means that the function's work cannot be rolled back after it completes,
-    and is not to be confused with "atomicity" (which is about ensuring that the function
-    either completes all its work or none of it).
-
-    We enforce this by ensuring that the function is not called within a transaction,
-    and that no transaction is left open when the function completes.
-
-    Raises:
-        _UnexpectedOpenTransaction: if a transaction is already open when this is called.
-        _UnexpectedDanglingTransaction: if a transaction remains open after the decorated
-            function exits. Before raising this exeption, we roll back and end the
-            transaction.
-    """
-
-    @functools.wraps(func)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-        if open_dbs := dbs_with_open_transactions():
-            raise _UnexpectedOpenTransaction(open_dbs=open_dbs)
-
-        return_value = func(*args, **kwargs)
-
-        if open_dbs := dbs_with_open_transactions():
-            # Clean up first, otherwise we may see errors later that will mask this one.
-            # This can only happen if the function manually opens a transaction,
-            # so we need to manually roll it back and close it.
-            for db_alias in open_dbs:
-                django_transaction.rollback(using=db_alias)
-                django_transaction.set_autocommit(True, using=db_alias)
-            raise _UnexpectedDanglingTransaction(open_dbs=open_dbs)
-
-        return return_value
-
-    return wrapper
-
-
-@contextlib.contextmanager
-def transaction_required(*, using: str | None = None) -> Iterator[None]:
-    """
-    Make sure that code is always executed in a transaction.
-
-    Can be used as a decorator or a context manager.
-
-    We ignore test-suite transactions when checking for a transaction
-    because we don't want to run the risk of allowing code to pass tests
-    but fail in production.
-
-    See Note [_MissingRequiredTransaction in tests]
-
-    Raises:
-        _MissingRequiredTransaction: if we are not in a transaction.
-    """
-    if using is None:
-        using = django_db.DEFAULT_DB_ALIAS
-
-    if not in_transaction(using=using):
-        raise _MissingRequiredTransaction(database=using)
-    yield
-
-
 @contextlib.contextmanager
 def transaction(*, using: str | None = None) -> Iterator[None]:
     """
     Create a database transaction.
 
     Nested calls are not allowed because SQL does not support nested transactions.
-    Consider this like `atomic(durable=True)`, but with added after-commit callback support in tests.
+    Consider this like Django's `atomic(durable=True)`, but with added after-commit callback support in tests.
 
     This wraps Django's 'atomic' function.
 
@@ -140,7 +63,7 @@ def transaction_if_not_already(*, using: str | None = None) -> Iterator[None]:
         yield
 
 
-class NotADecorator(Exception):
+class _NotADecorator(Exception):
     """
     Raised when a context manager is mistakenly used as a decorator.
     """
@@ -157,7 +80,7 @@ class _NonDecoratorContextManager[T_Co](contextlib._GeneratorContextManager[T_Co
     """
 
     def __call__(self, func: object) -> NoReturn:
-        raise NotADecorator
+        raise _NotADecorator
 
 
 def _contextmanager_without_decorator[**P, T_Co](
@@ -185,11 +108,12 @@ def savepoint(*, using: str | None = None) -> Generator[None, None, None]:
     Must be called inside an active transaction.
 
     Tips:
+
     - You should only create a savepoint if you may roll back to it before
       continuing with your transaction. If your intention is to ensure that
       your code is committed atomically, consider using `transaction_required`
       instead.
-    - Savepoint rollback should be handled _where we create the savepoint_.
+    - We believe savepoint rollback should be handled where the savepoint is created.
       That locality is not possible with a decorator, so this function
       deliberately does not work as one.
 
@@ -202,6 +126,69 @@ def savepoint(*, using: str | None = None) -> Generator[None, None, None]:
         django_transaction.atomic(using=using),
     ):
         yield
+
+
+@contextlib.contextmanager
+def transaction_required(*, using: str | None = None) -> Iterator[None]:
+    """
+    Make sure that code is always executed in a transaction.
+
+    Can be used as a decorator or a context manager.
+
+    We ignore test-suite transactions when checking for a transaction
+    because we don't want to run the risk of allowing code to pass tests
+    but fail in production.
+
+    See Note [_MissingRequiredTransaction in tests]
+
+    Raises:
+        _MissingRequiredTransaction: if we are not in a transaction.
+    """
+    if using is None:
+        using = django_db.DEFAULT_DB_ALIAS
+
+    if not in_transaction(using=using):
+        raise _MissingRequiredTransaction(database=using)
+    yield
+
+
+def durable[**P, R](func: Callable[P, R]) -> Callable[P, R]:
+    """
+    Enforce durability with this decorator.
+
+    "Durability" means that the function's work cannot be rolled back after it completes,
+    and is not to be confused with "atomicity" (which is about ensuring that the function
+    either completes all its work or none of it).
+
+    We enforce this by ensuring that the function is not called within a transaction,
+    and that no transaction is left open when the function completes.
+
+    Raises:
+        _UnexpectedOpenTransaction: if a transaction is already open when this is called.
+        _UnexpectedDanglingTransaction: if a transaction remains open after the decorated
+            function exits. Before raising this exeption, we roll back and end the
+            transaction.
+    """
+
+    @functools.wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        if open_dbs := dbs_with_open_transactions():
+            raise _UnexpectedOpenTransaction(open_dbs=open_dbs)
+
+        return_value = func(*args, **kwargs)
+
+        if open_dbs := dbs_with_open_transactions():
+            # Clean up first, otherwise we may see errors later that will mask this one.
+            # This can only happen if the function manually opens a transaction,
+            # so we need to manually roll it back and close it.
+            for db_alias in open_dbs:
+                django_transaction.rollback(using=db_alias)
+                django_transaction.set_autocommit(True, using=db_alias)
+            raise _UnexpectedDanglingTransaction(open_dbs=open_dbs)
+
+        return return_value
+
+    return wrapper
 
 
 @contextlib.contextmanager
@@ -428,3 +415,17 @@ def in_transaction(*, using: str | None = None) -> bool:
         return False
     else:
         return True
+
+
+def dbs_with_open_transactions() -> frozenset[str]:
+    """
+    Get the names of databases with open transactions.
+    """
+    dbs_with_open_transaction = set()
+    # Note: django_db.connections is a special class which implements __iter__,
+    # and should not be confused with a list or dict.
+    for db_alias in django_db.connections:
+        if in_transaction(using=db_alias):
+            dbs_with_open_transaction.add(db_alias)
+
+    return frozenset(dbs_with_open_transaction)
