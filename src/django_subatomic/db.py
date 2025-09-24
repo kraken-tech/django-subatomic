@@ -185,6 +185,7 @@ def savepoint(*, using: str | None = None) -> Generator[None, None, None]:
     Must be called inside an active transaction.
 
     Tips:
+
     - You should only create a savepoint if you may roll back to it before
       continuing with your transaction. If your intention is to ensure that
       your code is committed atomically, consider using `transaction_required`
