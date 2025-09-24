@@ -1,4 +1,4 @@
-## Django's Atomic
+# Django's Atomic
 
 Django's `atomic` ensures database changes are committed together-or-not-at-all.
 It creates a savepoint or a transaction depending on two factors:
