@@ -3,7 +3,7 @@
 Django's `atomic` ensures database changes are committed together-or-not-at-all.
 It creates a savepoint or a transaction depending on two factors:
 
-- The arguments passed to it (`durable` and `savepoint`).
+- The arguments passed to it (`durable=` and `savepoint=`).
 - If a database transaction is already open.
 
 ## Behaviours
@@ -12,7 +12,7 @@ Specifically, the **Behaviours** which `atomic` exhibits are:
 
 | `savepoint=`         | `durable=False` (default) | `durable=True` |
 | ---                  | ---                       | ---            |
-| **`True` (default)** | **A**. Begin a transaction if needed. Creates a savepoint if already in a transaction. | **B**. Begin a transaction, or throw an error if one is already open. Never creates a savepoint. (The `savepoint` flag is ignored.) |
+| **`True` (default)** | **A**. Begin a transaction if needed. Creates a savepoint if already in a transaction. | **B**. Begin a transaction, or throw an error if one is already open. Never creates a savepoint. (The `savepoint=` flag is ignored.) |
 | **`False`**          | **C**. Begin a transaction if needed. Never creates a savepoint. | **D**. Same as **B**.  |
 
 ## Outcomes
