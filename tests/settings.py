@@ -13,3 +13,6 @@ DATABASES = {
     ),
 }
 USE_TZ = True
+
+# It's OK for us to hard-code this secret key for the tests.
+SECRET_KEY = "hunter2"  # noqa: S105
