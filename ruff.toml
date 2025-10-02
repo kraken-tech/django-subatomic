@@ -36,6 +36,7 @@ ignore = [
     "PLR5501", # Use `elif` instead of `else` then `if`, to reduce indentation
     "PLR6301", # Method `foo` could be a function or static method
     "PT007",  # Wrong values type in `pytest.mark.parametrize` expected `list` of `tuple`
+    "PT012", # `pytest.raises()` block should contain a single simple statement.
     "PYI041", # Use `float` instead of `int | float`
     "RET505", # Unnecessary `else` after `return` statement
     "RUF001", # String contains ambiguous `’` (RIGHT SINGLE QUOTATION MARK). Did you mean ``` (GRAVE ACCENT)?
