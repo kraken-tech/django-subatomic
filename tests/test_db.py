@@ -85,7 +85,7 @@ class TestTransaction:
                 ),
             ):
                 with db.transaction():
-                    pass
+                    ...  # An exception is raised before we enter the body of this block.
 
     @pytest.mark.django_db(transaction=True)
     def test_creates_transaction(self) -> None:
@@ -146,6 +146,54 @@ class TestOnCommitCallbacksInTests:
 
         assert counter.count == 1
 
+    @_parametrize_transaction_testcase
+    def test_failures_in_callbacks_prevent_others_running(
+        self,
+    ) -> None:
+        """
+        If a callback fails, later callbacks do not run.
+        """
+        counter = Counter()
+        transaction_body_end_reached = False
+
+        def raises() -> None:
+            raise _AnError
+
+        with pytest.raises(_AnError):
+            with db.transaction():
+                db.run_after_commit(raises)
+                db.run_after_commit(counter.increment)
+                transaction_body_end_reached = True
+
+        assert transaction_body_end_reached is True
+        # The increment callback is never run.
+        assert counter.count == 0
+
+    @_parametrize_transaction_testcase
+    def test_failures_in_robust_callbacks_do_not_prevent_others_running(
+        self,
+    ) -> None:
+        """
+        If a robust callback fails, later callbacks still run.
+        """
+        counter = Counter()
+        error_raised = False
+
+        def raises() -> None:
+            nonlocal error_raised
+            error_raised = True
+            raise _AnError
+
+        with db.transaction():
+            # We use Django's `on_commit` here because `run_after_commit`
+            # does not support the `robust` argument.
+            django_transaction.on_commit(raises, robust=True)
+            db.run_after_commit(counter.increment)
+            assert counter.count == 0
+
+        assert error_raised is True
+        assert counter.count == 1
+
 
 class TestTransactionRequired:
     @_parametrize_transaction_testcase
@@ -155,7 +203,7 @@ class TestTransactionRequired:
         """
         with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
             with db.transaction_required():
-                pass
+                ...  # An exception is raised before we enter the body of this block.
 
         assert exc.value.database == DEFAULT
 
@@ -178,12 +226,23 @@ class TestTransactionRequired:
         """
         No error is raised when we're in a transaction.
         """
+        code_is_reached = False
+
         with db.transaction():
-            try:
-                with db.transaction_required():
-                    ...
-            except db._MissingRequiredTransaction:  # noqa: SLF001
-                pytest.fail("We should not have raised MissingRequiredTransaction.")
+            with db.transaction_required():
+                code_is_reached = True
+
+        assert code_is_reached is True
+
+    @_parametrize_transaction_testcase
+    def test_different_database(self) -> None:
+        """
+        Transactions on other databases do not fulfill the requirement.
+        """
+        with db.transaction(using=DEFAULT):
+            with pytest.raises(db._MissingRequiredTransaction):  # noqa: SLF001
+                with db.transaction_required(using=OTHER):
+                    ...  # An exception is raised before we enter the body of this block.
 
 
 class TestSavepointContextManager:
@@ -194,7 +253,7 @@ class TestSavepointContextManager:
         # Note: We didn't create a transaction first.
         with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
             with db.savepoint():
-                pass
+                ...  # An exception is raised before we enter the body of this block.
 
         assert exc.value.database == DEFAULT
 

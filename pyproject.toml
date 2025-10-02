@@ -73,6 +73,9 @@ docs = [
     "mkdocs-api-autonav",
     "mkdocs-material>=9.5.0",
 ]
+coverage = [
+    "coverage",
+]
 mypy = [
     {include-group = "python_tests"},
     "django-stubs[compatible-mypy]",
@@ -102,3 +105,25 @@ exclude = "build/"
 strict = true
 warn_unreachable = true
 warn_no_return = true
+
+
+# Coverage
+[tool.coverage.run]
+branch = true
+core = "sysmon"
+source_pkgs = [
+    "django_subatomic",
+    "tests",
+]
+
+[tool.coverage.paths]
+source = [
+    "src",
+    ".tox/*/lib/*/site-packages/",
+]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true
+skip_empty = true
