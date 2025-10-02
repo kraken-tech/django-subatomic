@@ -85,7 +85,7 @@ class TestTransaction:
                 ),
             ):
                 with db.transaction():
-                    pass
+                    ...  # An exception is raised before we enter the body of this block.
 
     @pytest.mark.django_db(transaction=True)
     def test_creates_transaction(self) -> None:
@@ -155,7 +155,7 @@ class TestTransactionRequired:
         """
         with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
             with db.transaction_required():
-                pass
+                ...  # An exception is raised before we enter the body of this block.
 
         assert exc.value.database == DEFAULT
 
@@ -178,12 +178,13 @@ class TestTransactionRequired:
         """
         No error is raised when we're in a transaction.
         """
+        code_is_reached = False
+
         with db.transaction():
-            try:
-                with db.transaction_required():
-                    ...
-            except db._MissingRequiredTransaction:  # noqa: SLF001
-                pytest.fail("We should not have raised MissingRequiredTransaction.")
+            with db.transaction_required():
+                code_is_reached = True
+
+        assert code_is_reached is True
 
 
 class TestSavepointContextManager:
@@ -194,7 +195,7 @@ class TestSavepointContextManager:
         # Note: We didn't create a transaction first.
         with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
             with db.savepoint():
-                pass
+                ...  # An exception is raised before we enter the body of this block.
 
         assert exc.value.database == DEFAULT
 
