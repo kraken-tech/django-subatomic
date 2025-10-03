@@ -13,7 +13,7 @@ from . import _utils
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator, Iterator
+    from collections.abc import Callable, Generator
 
 
 __all__ = [
@@ -29,7 +29,7 @@ __all__ = [
 
 
 @contextlib.contextmanager
-def transaction(*, using: str | None = None) -> Iterator[None]:
+def transaction(*, using: str | None = None) -> Generator[None]:
     """
     Create a database transaction.
 
@@ -51,7 +51,7 @@ def transaction(*, using: str | None = None) -> Iterator[None]:
 
 
 @contextlib.contextmanager
-def transaction_if_not_already(*, using: str | None = None) -> Iterator[None]:
+def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
     """
     Create a transaction if one isn't already open.
 
@@ -77,7 +77,7 @@ def transaction_if_not_already(*, using: str | None = None) -> Iterator[None]:
 
 
 @_utils.contextmanager
-def savepoint(*, using: str | None = None) -> Generator[None, None, None]:
+def savepoint(*, using: str | None = None) -> Generator[None]:
     """
     Create a database savepoint.
 
@@ -105,7 +105,7 @@ def savepoint(*, using: str | None = None) -> Generator[None, None, None]:
 
 
 @contextlib.contextmanager
-def transaction_required(*, using: str | None = None) -> Iterator[None]:
+def transaction_required(*, using: str | None = None) -> Generator[None]:
     """
     Make sure that code is always executed in a transaction.
 
@@ -168,7 +168,7 @@ def durable[**P, R](func: Callable[P, R]) -> Callable[P, R]:
 
 
 @contextlib.contextmanager
-def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Iterator[None]:
+def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Generator[None]:
     """
     Run on-commit callbacks when the outermost non-testcase atomic context exits.
 
