@@ -9,10 +9,11 @@ from django import db as django_db
 from django.conf import settings
 from django.db import transaction as django_transaction
 
+from . import _utils
+
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterator
-    from typing import NoReturn
 
 
 @contextlib.contextmanager
@@ -63,44 +64,7 @@ def transaction_if_not_already(*, using: str | None = None) -> Iterator[None]:
         yield
 
 
-class _NotADecorator(Exception):
-    """
-    Raised when a context manager is mistakenly used as a decorator.
-    """
-
-
-class _NonDecoratorContextManager[T_Co](contextlib._GeneratorContextManager[T_Co]):  # noqa: SLF001
-    """
-    Hacked version of contextlib._GeneratorContextManager that prevents use as a decorator.
-
-    Use _contextmanager_without_decorator to create instances of this class.
-
-    This is a weird hack, but it beats copying the bulk of the
-    contextlib.contextmanager code into our own codebase.
-    """
-
-    def __call__(self, func: object) -> NoReturn:
-        raise _NotADecorator
-
-
-def _contextmanager_without_decorator[**P, T_Co](
-    func: Callable[P, Generator[T_Co, None, None]], /
-) -> Callable[P, _NonDecoratorContextManager[T_Co]]:
-    """
-    Decorate a generator function to make it a context manager.
-
-    This is pretty much the same as `contextlib.contextmanager`,
-    but it prevents use as a decorator.
-    """
-
-    @functools.wraps(func)
-    def helper(*args: P.args, **kwds: P.kwargs) -> _NonDecoratorContextManager[T_Co]:
-        return _NonDecoratorContextManager(func, args, kwds)
-
-    return helper
-
-
-@_contextmanager_without_decorator
+@_utils.contextmanager
 def savepoint(*, using: str | None = None) -> Generator[None, None, None]:
     """
     Create a database savepoint.
