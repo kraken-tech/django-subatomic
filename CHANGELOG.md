@@ -13,10 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Removed
 
-- `django_subatomic.db.NotADecorator` is no longer a part of the public API.
-  It has been renamed to `_NotADecorator`.
-  This implementation detail was not intended for general use,
-  and may be removed in a future release.
+- `_contextmanager_without_decorator`, `_NonDecoratorContextManager`, `NotADecorator`.
+  These implementation details were not intended to be a part of our public API.
 
 ## [0.1.1] - 2025-09-20
 

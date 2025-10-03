@@ -261,9 +261,10 @@ class TestSavepointContextManager:
         """
         `savepoint` cannot be used as a decorator.
         """
-        with pytest.raises(db._NotADecorator):  # noqa: SLF001
+        expected_error = "'_ContextManagerOnly' object is not callable"
+        with pytest.raises(TypeError, match=expected_error):
 
-            @db.savepoint()
+            @db.savepoint()  # type: ignore[operator]
             def inner() -> None: ...
 
     @test.part_of_a_transaction()
