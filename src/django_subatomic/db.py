@@ -16,6 +16,18 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterator
 
 
+__all__ = [
+    "dbs_with_open_transactions",
+    "durable",
+    "in_transaction",
+    "run_after_commit",
+    "savepoint",
+    "transaction",
+    "transaction_if_not_already",
+    "transaction_required",
+]
+
+
 @contextlib.contextmanager
 def transaction(*, using: str | None = None) -> Iterator[None]:
     """

@@ -9,6 +9,10 @@ from django.db import transaction
 if TYPE_CHECKING:
     from collections.abc import Generator
 
+__all__ = [
+    "part_of_a_transaction",
+]
+
 
 @contextlib.contextmanager
 def part_of_a_transaction(using: str | None = None) -> Generator[None]:
