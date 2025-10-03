@@ -1,38 +1,155 @@
-## Django's Atomic
-Django's `atomic` ensures database changes are committed together-or-not-at-all. It creates a savepoint or a transaction depending on two factors:
+# Django's Atomic
 
-- The arguments passed to it (`durable` and `savepoint`).
+Django's `atomic` ensures database changes are committed together-or-not-at-all.
+It creates a savepoint or a transaction depending on two factors:
+
+- The arguments passed to it (`durable=` and `savepoint=`).
 - If a database transaction is already open.
+
+## Behaviours
 
 Specifically, the **Behaviours** which `atomic` exhibits are:
 
-|  | `durable=False` (default) | `durable=True` |
-| --- | --- | --- |
-| `savepoint=True` (default) | **A**. Begin a transaction if needed. Creates a savepoint if already in a transaction. | **B**. Begin a transaction, or throw an error if one is already open. Never creates a savepoint. (The `savepoint` flag is ignored.) |
-| `savepoint=False` | **C**. Begin a transaction if needed. Never creates a savepoint. | **D**. Same as **B**.  |
+| `savepoint=`         | `durable=False` (default) | `durable=True` |
+| ---                  | ---                       | ---            |
+| **`True` (default)** | **A**. Begin a transaction if needed. Creates a savepoint if already in a transaction. | **B**. Begin a transaction, or throw an error if one is already open. Never creates a savepoint. (The `savepoint=` flag is ignored.) |
+| **`False`**          | **C**. Begin a transaction if needed. Never creates a savepoint. | Same as **B**.  |
 
-Uses of `atomic` fall into three broad **Categories**:
+## Outcomes
 
-1. Create a *transaction* to wrap multiple changes.
-2. Create a *savepoint* so we can roll back to in order to continue with a transaction after failure.
-3. Changes to be committed *atomically*, but not specific about where the transaction is created, as long as there is one.
+When people use `atomic`,
+they're generally trying to achieve one of three **Outcomes**:
+
+1. to create a *transaction*
+   which will commit multiple changes atomically.
+2. to create a *savepoint*
+   so we can roll back to in order to continue with a transaction after failure.
+3. to indicate that changes should be committed atomically,
+   without needing to be specific about the scope of the transaction,
+   as long as there is one.
 
 ## Problems
 
-Django's atomic creates many savepoints that are never used. There are a couple of main causes:
+### Ambiguous code
 
-1. Savepoints are created with decorators (`@atomic`).
-2. `atomic` creates savepoints by default. The default arguments (*Behaviour* **A**) are an [attractive nuisance](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html) because they make us create savepoints when we don't need them.
+Ideally, we should be able to look at a line of code and say what it will do.
 
-    > … if you have two ways to accomplish a task and one is a simple way that *looks* like the right thing but is subtly wrong, and the other is correct but
-    > more complicated, the majority of people will end up doing the wrong
-    > thing.
-    > — [**Attractive nuisances in software design**](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html) - [Paul Ganssle](https://blog.ganssle.io/author/paul-ganssle.html)
+Because `atomic`'s behaviour depends on if a transaction is already open,
+one must know the full call stack
+to know what any one `atomic` will do.
+If it is called in multiple code paths,
+we may expect it to do different database operations
+depending on who calls it.
 
-3. We have no easy way to indicate the creation of a savepoint that doesn't have the potential to create a transaction instead. The only tool we have to create a savepoint is *Behaviour* **A**, which can create a transaction.
+### Savepoints by default
+
+`atomic` defaults to *Behaviour* **A**
+which creates savepoints by default
+when there is already an open transaction.
+
+It's common to decorate functions with `atomic`
+in order to achieve *Outcome* **3**,
+but neglect to pass `savepoint=False`,
+meaning we create savepoints we do not need.
+This is an [attractive nuisance][attractive-nuisance].
+
+> … if you have two ways to accomplish a task
+> and one is a simple way
+> that *looks* like the right thing but is subtly wrong,
+> and the other is correct
+> but more complicated,
+> the majority of people will end up doing the wrong thing.
+>
+> — [**Attractive nuisances in software design**][attractive-nuisance] - [Paul Ganssle][]
+
+### Savepoints as decorators
+
+Savepoints are intrinsically linked to error handling.
+They are only required when we need
+a safe place to continue from after a failure within a transaction.
+Ideally then, the logic for catching the failure and continuing a transaction
+should be adjacent to the logic which creates the savepoint.
+
+When we use `atomic` as a decorator,
+we separate the savepoint creation from the error handling logic.
+The decorated function will not be within a `try:...except...:`.
+
+This lack of cohesion
+can make it difficult to know
+where continuing after rolling back a savepoint is intended to be handled,
+or even if it is handled at all.
+This is compounded by the fact that
+because `atomic`'s API is ambiguous,
+it can be hard to know the intended *Outcome*.
+
+### Transactions without context
+
+Low-level code rarely has the context to know when a transaction should be committed.
+For example, it may know that its changes must happen atomically,
+but cannot know if it is part of a larger suite of changes
+managed by higher-level code
+which must also be committed together.
+
+When low-level code uses `atomic`
+to indicate that its changes should be atomic (*Outcome* **3**),
+this can have one of two outcomes:
+
+- If the higher-level code has opened a transaction,
+  the lower-level code will create a savepoint it does not need.
+
+- If the higher-level code has not opened a transaction,
+  the lower-level code will.
+  While this will achieve the atomicity _it_ demands,
+  it fails to ensure that the larger suite of changes
+  is also atomic.
+
+Django offers no APIs to indicate
+the creation of a savepoint (*Outcome* **2**)
+or the need for atomicity (*Outcome* **3**)
+that doesn't have the potential to create a transaction instead.
+
+### Tests without after-commit callbacks
+
+To avoid leaking state between tests,
+Django's `TestCase` runs each test within a transaction
+which gets rolled back at the end of the test.
+As a result,
+`atomic` blocks encountered during the test
+will not create transactions
+so no after-commit callbacks will be run.
+
+Even if Django wanted to simulate after-commit callbacks in tests,
+it has no way to know which *Outcome* was intended
+when it encounters an `atomic` block.
+It might be running a high-level test where a transaction is intended
+and callbacks should be run,
+or a low-level test where an open transaction is assumed
+and callbacks should _not_ be run.
+
+To compensate,
+developers must either manually run after-commit callbacks in tests,
+which is prone to error and omission,
+or run the test using `TransactionTestCase`,
+which can be very slow.
 
 ## What Subatomic implements
-- `transaction()`. Begin a transaction, or throw an error if a transaction is already open. Like `atomic(durable=True)`, but with added after-commit callback support in tests.
-- `savepoint()`. Create a savepoint, or throw an error if we're not already in a transaction. This is not in the table of *Behaviours* (the closest we have is *Behaviour* **A**, but that can create transactions).
-- `transaction_if_not_already()`. Begin a transaction if we're not already in one. Just like *Behaviour* **C**. This has a bit of a clunky name. This is deliberate, and reflects that it's a bit of a clunky thing to do. To be used with caution because the creation of a transaction is implicit. For a stricter alternative, see `transaction_required()` below.
-- `transaction_required()`. Throw an error if we're not already in a transaction. Does not create savepoints *or* transactions.
+- `transaction()`.
+  Begin a transaction, or throw an error if a transaction is already open.
+  Like `atomic(durable=True)`, but with added after-commit callback support in tests.
+- `savepoint()`.
+  Create a savepoint, or throw an error if we're not already in a transaction.
+  This is not in the table of *Behaviours*
+  (the closest we have is *Behaviour* **A**, but that can create transactions).
+- `transaction_if_not_already()`.
+  Begin a transaction if we're not already in one.
+  Just like *Behaviour* **C**.
+  This has a bit of a clunky name.
+  This is deliberate, and reflects that it's a bit of a clunky thing to do.
+  To be used with caution because the creation of a transaction is implicit.
+  For a stricter alternative, see `transaction_required()` below.
+- `transaction_required()`.
+  Throw an error if we're not already in a transaction.
+  Does not create savepoints *or* transactions.
+
+[attractive-nuisance]: https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html
+[Paul Ganssle]: https://blog.ganssle.io/author/paul-ganssle.html
