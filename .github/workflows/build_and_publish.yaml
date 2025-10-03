@@ -34,7 +34,7 @@ jobs:
         cache: 'pip'
     - run: python -m pip install .
     - id: package_version
-      run: echo "version=$(python -c "from importlib.metadata import version; print(version('django-subatomic'))")" >> $GITHUB_OUTPUT
+      run: echo "version=$(python -c "from importlib.metadata import version; print(version('django-subatomic'))")" >> "$GITHUB_OUTPUT"
     - name: check package version matches tag
       run: |
         [ "v${{ steps.package_version.outputs.version }}" = "${{ github.ref_name }}" ]
