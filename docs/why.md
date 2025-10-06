@@ -41,6 +41,9 @@ If it is called in multiple code paths,
 developers must know that it will do different database operations
 depending on who calls it.
 
+Subatomic avoids this issue
+by offering an unambiguous API (`transaction()`, `savepoint()`, etc).
+
 ### Transactions without context
 
 Low-level code rarely has the context to know when a transaction should be committed.
@@ -67,6 +70,10 @@ the creation of a savepoint (*Outcome* **2**)
 or the need for atomicity (*Outcome* **3**)
 that doesn't have the potential to create a transaction instead.
 
+A function decorated with Subatomic's `@transaction_required`
+will raise an error when called outside of a transaction,
+rather than run the risk of creating a transaction with the wrong scope.
+
 ### Savepoints by default
 
 `atomic` defaults to *Behaviour* **A**
@@ -77,6 +84,10 @@ It's common to decorate functions with `atomic`
 to indicate that code should be atomic (*Outcome* **3**),
 but neglect to pass `savepoint=False`.
 This results in more database queries than necessary.
+
+Subatomic's `@transaction_required` decorator
+gives developers an unambiguous alternative
+that will never open a savepoint.
 
 ### Savepoints as decorators
 
@@ -98,6 +109,9 @@ This is compounded by the fact that
 because `atomic`'s API is ambiguous,
 it can be hard to know the intended *Outcome*.
 
+To encourage putting rollback logic alongside savepoint creation,
+Subatomic's `savepoint` cannot be used as a decorator.
+
 ### Tests without after-commit callbacks
 
 To avoid leaking state between tests,
@@ -116,27 +130,12 @@ and callbacks should be run,
 or a low-level test where an open transaction is assumed
 and callbacks should _not_ be run.
 
-To compensate,
+Without Subatomic,
 developers must either manually run after-commit callbacks in tests,
 which is prone to error and omission,
 or run the test using `TransactionTestCase`,
 which can be very slow.
 
-## What Subatomic implements
-- `transaction()`.
-  Begin a transaction, or throw an error if a transaction is already open.
-  Like `atomic(durable=True)`, but with added after-commit callback support in tests.
-- `savepoint()`.
-  Create a savepoint, or throw an error if we're not already in a transaction.
-  This is not in the table of *Behaviours*
-  (the closest we have is *Behaviour* **A**, but that can create transactions).
-- `transaction_if_not_already()`.
-  Begin a transaction if we're not already in one.
-  Just like *Behaviour* **C**.
-  This has a bit of a clunky name.
-  This is deliberate, and reflects that it's a bit of a clunky thing to do.
-  To be used with caution because the creation of a transaction is implicit.
-  For a stricter alternative, see `transaction_required()` below.
-- `transaction_required()`.
-  Throw an error if we're not already in a transaction.
-  Does not create savepoints *or* transactions.
+Subatomic's `transaction()` function
+will run after-commit callbacks automatically in tests
+so that code behaves the same in tests as it does in production.
