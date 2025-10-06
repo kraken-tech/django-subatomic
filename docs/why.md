@@ -13,7 +13,7 @@ It creates a savepoint or a transaction depending on two factors:
 
 ## Behaviours
 
-The **Behaviours** which `atomic` exhibits are:
+The *Behaviours* which `atomic` exhibits are:
 
 | `savepoint=`         | `durable=False` (default) | `durable=True` |
 | ---                  | ---                       | ---            |
@@ -23,7 +23,7 @@ The **Behaviours** which `atomic` exhibits are:
 ## Outcomes
 
 When people use `atomic`,
-they're generally trying to achieve one of three **Outcomes**:
+they're generally trying to achieve one of three *Outcomes*:
 
 1. to create a *transaction*
    which will commit multiple changes atomically.
