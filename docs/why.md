@@ -1,11 +1,11 @@
 # Django's Atomic
 
-This doc will discuss the behaviours available through Django's `atomic`
+This doc will discuss the behaviours available through [Django's `atomic`][atomic]
 and the outcomes people are usually trying to achieve with it.
-It goes on to outline some pitfalls that can result from using `atomic`
+It goes on to outline some pitfalls that can result from using [`atomic`][atomic]
 and how Subatomic avoids them.
 
-Django's `atomic` ensures database changes are committed together-or-not-at-all.
+Django's [`atomic`][atomic] ensures database changes are committed together-or-not-at-all.
 It creates a savepoint or a transaction depending on two factors:
 
 - The arguments passed to it (`durable=` and `savepoint=`).
@@ -13,7 +13,7 @@ It creates a savepoint or a transaction depending on two factors:
 
 ## Behaviours
 
-The *Behaviours* which `atomic` exhibits are:
+The *Behaviours* which [`atomic`][atomic] exhibits are:
 
 | `savepoint=`         | `durable=False` (default) | `durable=True` |
 | ---                  | ---                       | ---            |
@@ -22,7 +22,7 @@ The *Behaviours* which `atomic` exhibits are:
 
 ## Outcomes
 
-When people use `atomic`,
+When people use [`atomic`][atomic],
 they're generally trying to achieve one of three *Outcomes*:
 
 1. to create a *transaction*
@@ -39,9 +39,9 @@ they're generally trying to achieve one of three *Outcomes*:
 
 Ideally, we should be able to look at a line of code and say what it will do.
 
-Because `atomic`'s behaviour depends on whether a transaction is already open,
+Because [`atomic`][atomic]'s behaviour depends on whether a transaction is already open,
 one must know the full call stack
-to know what any particular `atomic` will do.
+to know what any particular [`atomic`][atomic] will do.
 If it is called in multiple code paths,
 developers must know that it will do different database operations
 depending on who calls it.
@@ -57,7 +57,7 @@ but cannot know if it is part of a larger suite of changes
 managed by higher-level code
 which must also be committed together.
 
-When low-level code uses `atomic`
+When low-level code uses [`atomic`][atomic]
 to indicate that its changes should be atomic (*Outcome* **3**),
 this can have one of two effects:
 
@@ -81,11 +81,11 @@ rather than run the risk of creating a transaction with the wrong scope.
 
 ### Savepoints by default
 
-`atomic` defaults to *Behaviour* **A**
+[`atomic`][atomic] defaults to *Behaviour* **A**
 which creates savepoints by default
 when there is already an open transaction.
 
-It's common to decorate functions with `atomic`
+It's common to decorate functions with [`atomic`][atomic]
 to indicate that code should be atomic (*Outcome* **3**),
 but neglect to pass `savepoint=False`.
 This results in more database queries than necessary.
@@ -102,7 +102,7 @@ a safe place to continue from after a failure within a transaction.
 Ideally then, the logic for catching the failure and continuing a transaction
 should be adjacent to the logic which creates the savepoint.
 
-When we use `atomic` as a decorator,
+When we use [`atomic`][atomic] as a decorator,
 we separate the savepoint creation from the error handling logic.
 The decorated function will not be within a `try:...except...:`.
 
@@ -111,7 +111,7 @@ can make it difficult to know
 where continuing after rolling back a savepoint is intended to be handled,
 or even if it is handled at all.
 This is compounded by the fact that
-because `atomic`'s API is ambiguous,
+because [`atomic`][atomic]'s API is ambiguous,
 it can be hard to know the intended *Outcome*.
 
 To encourage putting rollback logic alongside savepoint creation,
@@ -120,16 +120,16 @@ Subatomic's `savepoint` cannot be used as a decorator.
 ### Tests without after-commit callbacks
 
 To avoid leaking state between tests,
-Django's `TestCase` runs each test within a transaction
+Django's [`TestCase`][TestCase] runs each test within a transaction
 which gets rolled back at the end of the test.
 As a result,
-`atomic` blocks encountered during the test
+[`atomic`][atomic] blocks encountered during the test
 will not create transactions
 so no after-commit callbacks will be run.
 
 Even if Django wanted to simulate after-commit callbacks in tests,
 it has no way to know which *Outcome* was intended
-when it encounters an `atomic` block.
+when it encounters an [`atomic`][atomic] block.
 It might be running a high-level test where a transaction is intended
 and callbacks should be run,
 or a low-level test where an open transaction is assumed
@@ -138,9 +138,13 @@ and callbacks should _not_ be run.
 Without Subatomic,
 developers must either manually run after-commit callbacks in tests,
 which is prone to error and omission,
-or run the test using `TransactionTestCase`,
+or run the test using [`TransactionTestCase`][TransactionTestCase],
 which can be very slow.
 
 Subatomic's `transaction()` function
 will run after-commit callbacks automatically in tests
 so that code behaves the same in tests as it does in production.
+
+[atomic]: https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic
+[TestCase]: https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.TestCase
+[TransactionTestCase]: https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.TransactionTestCase

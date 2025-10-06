@@ -23,7 +23,7 @@ which can be used as both a decorator and a context manager.
 
     SQL does not support nested transactions,
     so nesting is not supported by `transaction`.
-    It acts like [Django's `atomic` with `durable=True`](https://docs.djangoproject.com/en/5.0/topics/db/transactions/#controlling-transactions-explicitly).
+    It acts like [Django's `atomic` with `durable=True`][django-atomic]
 
     See [_Atomic code_](#atomic-code)
     for code which requires a transaction, but doesn't require partial rollback.
