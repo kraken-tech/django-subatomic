@@ -47,7 +47,8 @@ developers must know that it will do different database operations
 depending on who calls it.
 
 Subatomic avoids this issue
-by offering an unambiguous API (`transaction()`, `savepoint()`, etc).
+by offering an unambiguous API
+([`transaction()`][django_subatomic.db.transaction], [`savepoint()`][django_subatomic.db.savepoint], etc).
 
 ### Transactions without context
 
@@ -75,7 +76,7 @@ the creation of a savepoint (*Outcome* **2**)
 or the need for atomicity (*Outcome* **3**)
 that doesn't have the potential to create a transaction instead.
 
-A function decorated with Subatomic's `@transaction_required`
+A function decorated with Subatomic's [`@transaction_required`][django_subatomic.db.transaction_required]
 will raise an error when called outside of a transaction,
 rather than run the risk of creating a transaction with the wrong scope.
 
@@ -90,7 +91,7 @@ to indicate that code should be atomic (*Outcome* **3**),
 but neglect to pass `savepoint=False`.
 This results in more database queries than necessary.
 
-Subatomic's `@transaction_required` decorator
+Subatomic's [`@transaction_required`][django_subatomic.db.transaction_required] decorator
 gives developers an unambiguous alternative
 that will never open a savepoint.
 
@@ -115,7 +116,7 @@ because [`atomic`][atomic]'s API is ambiguous,
 it can be hard to know the intended *Outcome*.
 
 To encourage putting rollback logic alongside savepoint creation,
-Subatomic's `savepoint` cannot be used as a decorator.
+Subatomic's [`savepoint`][django_subatomic.db.savepoint] cannot be used as a decorator.
 
 ### Tests without after-commit callbacks
 
@@ -141,7 +142,7 @@ which is prone to error and omission,
 or run the test using [`TransactionTestCase`][TransactionTestCase],
 which can be very slow.
 
-Subatomic's `transaction()` function
+Subatomic's [`transaction()`][django_subatomic.db.transaction] function
 will run after-commit callbacks automatically in tests
 so that code behaves the same in tests as it does in production.
 

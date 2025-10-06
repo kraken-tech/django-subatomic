@@ -16,7 +16,7 @@ and is committed with `COMMIT`.
 A transaction can be ended without committing using `ROLLBACK`.
 
 When using Django Subatomic,
-transactions are created with `django_subatomic.db.transaction`,
+transactions are created with [`transaction`][django_subatomic.db.transaction],
 which can be used as both a decorator and a context manager.
 
 !!! Note
@@ -51,7 +51,7 @@ In SQL terms, a savepoint is created with `SAVEPOINT <name>`.
 It is rolled back with `ROLLBACK TO <name>`
 and discarded with `RELEASE SAVEPOINT <name>`.
 
-Subatomic creates savepoints using `django_subatomic.db.savepoint`.
+Subatomic creates savepoints using [`savepoint`][django_subatomic.db.savepoint].
 This is a context manager,
 and cannot be used as a decorator.
 
@@ -65,23 +65,23 @@ and cannot be used as a decorator.
 Sometimes code needs to make multiple database changes atomically
 in a place that should not be responsible for managing a transactions.
 
-Decorate this code with `@django_subatomic.db.transaction_required`
+Decorate this code with [`@transaction_required`][django_subatomic.db.transaction_required]
 to make it raise an exception when someone tries to run it without first opening a transaction.
 
 !!! Tip
 
-    Where possible, use `transaction_required` as a decorator.
+    Where possible, use [`transaction_required`][django_subatomic.db.transaction_required] as a decorator.
 
     This form is preferred because it fails earlier,
     and presents a clearer requirement to programmers.
 
-    You can still use `transaction_required` as a context manager though.
+    You can still use [`transaction_required`][django_subatomic.db.transaction_required] as a context manager though.
     This might be useful in code where you cannot know the required database
     (such as when the database name is passed in as a function parameter).
 
 !!! Warning
 
-    When testing code which uses `transaction_required`
+    When testing code which uses [`transaction_required`][django_subatomic.db.transaction_required],
     you might see `_MissingRequiredTransaction`
     even though tests are run in a transaction by default.
 
@@ -93,15 +93,15 @@ to make it raise an exception when someone tries to run it without first opening
     then you have probably forgotten to open a transaction.
 
     The trade-off is that lower-level tests will see this error too.
-    If you're testing `transaction_required` code directly,
+    If you're testing [`transaction_required`][django_subatomic.db.transaction_required] code directly,
     and you're _sure_ that the code shouldn't be responsible for opening a transaction,
-    use the `django_subatomic.test.part_of_a_transaction()` decorator/context-manager
+    use the [`part_of_a_transaction`][django_subatomic.test.part_of_a_transaction] decorator/context-manager
     to get things working.
     This will not run after-commit hooks.
     If you'd like those to run, create a [transaction](#transactions) instead.
 
 When "create-a-transaction-if-one-doesn't-already-exist" behaviour is required,
-the `transaction_if_not_already` function will provide it.
+the [`transaction_if_not_already`][django_subatomic.db.transaction_if_not_already] function will provide it.
 This approach hints that transactional behaviour is not well-defined:
 the code will do different things in different contexts,
 which makes it hard to know what to expect from it.
