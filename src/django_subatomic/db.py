@@ -59,12 +59,15 @@ def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
 
     Use of this hints at code which lacks control over the state it's called in.
 
-    Suggested alternatives:
 
-    - In functions which should not control transactions, use `transaction_required`.
-      This ensures they are handled by the caller.
 
-    - In functions which can unambiguously control transactions, use `transaction`.
+    Tip: Suggested alternatives
+        - In functions which should not control transactions,
+          use [`transaction_required`][django_subatomic.db.transaction_required].
+          This ensures they are handled by the caller.
+
+        - In functions which can unambiguously control transactions,
+          use [`transaction`][django_subatomic.db.transaction].
     """
     # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
     # This allows for a rollback when an exception propagates out of this block, and so
@@ -87,15 +90,14 @@ def savepoint(*, using: str | None = None) -> Generator[None]:
 
     Must be called inside an active transaction.
 
-    Tips:
-
-    - You should only create a savepoint if you may roll back to it before
-      continuing with your transaction. If your intention is to ensure that
-      your code is committed atomically, consider using `transaction_required`
-      instead.
-    - We believe savepoint rollback should be handled where the savepoint is created.
-      That locality is not possible with a decorator, so this function
-      deliberately does not work as one.
+    Tip: Recommended usage
+        - You should only create a savepoint if you may roll back to it before
+          continuing with your transaction. If your intention is to ensure that
+          your code is committed atomically, consider using [`transaction_required`][django_subatomic.db.transaction_required]
+          instead.
+        - We believe savepoint rollback should be handled where the savepoint is created.
+          That locality is not possible with a decorator, so this function
+          deliberately does not work as one.
 
     Raises:
         _MissingRequiredTransaction: if we are not in a transaction
@@ -317,9 +319,10 @@ def run_after_commit(
     By default, an error will be raised if there is no transaction open.
     The transaction opened by tests is ignored for this purpose.
 
-    Note that Django's `on_commit` has a `robust` parameter, which allows a callback to fail silently.
-    Kraken has a convention to "not allow code to fail silently"
-    so this behaviour is not available from this function.
+    Note:
+        Django's `on_commit` has a `robust` parameter, which allows a callback
+        to fail silently. Kraken has a convention to "not allow code to fail
+        silently" so this behaviour is not available from this function.
     """
     if using is None:
         using = django_db.DEFAULT_DB_ALIAS
