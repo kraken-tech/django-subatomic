@@ -37,6 +37,8 @@ extra:
       - latest
 markdown_extensions:
   - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
   - tables
   - toc:
       permalink: true
