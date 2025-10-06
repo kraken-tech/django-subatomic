@@ -11,6 +11,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Search plugin for MkDocs
 
+### Fixed
+
+- Ensure cleanup actions in `durable` always happen when the wrapped code raises an unexpected error.
+
 ### Removed
 
 - `_contextmanager_without_decorator`, `_NonDecoratorContextManager`, `NotADecorator`.
