@@ -33,6 +33,8 @@ def transaction(*, using: str | None = None) -> Generator[None]:
     """
     Create a database transaction.
 
+    Can be used as a decorator or a context manager.
+
     Nested calls are not allowed because SQL does not support nested transactions.
     Consider this like Django's `atomic(durable=True)`, but with added after-commit callback support in tests.
 
@@ -52,6 +54,8 @@ def transaction(*, using: str | None = None) -> Generator[None]:
 def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
     """
     Create a transaction if one isn't already open.
+
+    Can be used as a decorator or a context manager.
 
     Use of this hints at code which lacks control over the state it's called in.
 
@@ -78,6 +82,8 @@ def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
 def savepoint(*, using: str | None = None) -> Generator[None]:
     """
     Create a database savepoint.
+
+    Can be used as a context manager, but _not_ as a decorator.
 
     Must be called inside an active transaction.
 
@@ -129,6 +135,8 @@ def transaction_required(*, using: str | None = None) -> Generator[None]:
 def durable[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     """
     Enforce durability with this decorator.
+
+    Can be used as a decorator, but _not_ as a context manager.
 
     "Durability" means that the function's work cannot be rolled back after it completes,
     and is not to be confused with "atomicity" (which is about ensuring that the function
