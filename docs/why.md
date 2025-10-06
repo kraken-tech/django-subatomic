@@ -33,16 +33,6 @@ There are a couple of main causes:
    The default arguments (*Behaviour* **A**)
    are an [attractive nuisance](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html)
    because they make us create savepoints when we don't need them.
-
-    > … if you have two ways to accomplish a task
-    > and one is a simple way
-    > that *looks* like the right thing but is subtly wrong,
-    > and the other is correct
-    > but more complicated,
-    > the majority of people will end up doing the wrong thing.
-    >
-    > — [**Attractive nuisances in software design**](https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html) - [Paul Ganssle](https://blog.ganssle.io/author/paul-ganssle.html)
-
 3. We have no easy way to indicate the creation of a savepoint
   that doesn't have the potential to create a transaction instead.
   The only tool we have to create a savepoint is *Behaviour* **A**,
