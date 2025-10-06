@@ -36,8 +36,6 @@ def transaction(*, using: str | None = None) -> Generator[None]:
     Nested calls are not allowed because SQL does not support nested transactions.
     Consider this like Django's `atomic(durable=True)`, but with added after-commit callback support in tests.
 
-    This wraps Django's 'atomic' function.
-
     Raises:
         RuntimeError: if we call this from inside another existing transaction.
     """
