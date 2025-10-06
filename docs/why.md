@@ -1,5 +1,10 @@
 # Django's Atomic
 
+This doc will discuss the behaviours available through Django's `atomic`
+and the outcomes people are usually trying to achieve with it.
+It goes on to outline some pitfalls that can result from using `atomic`
+and how Subatomic avoids them.
+
 Django's `atomic` ensures database changes are committed together-or-not-at-all.
 It creates a savepoint or a transaction depending on two factors:
 
