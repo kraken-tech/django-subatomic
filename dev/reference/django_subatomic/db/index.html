@@ -1222,8 +1222,7 @@ transaction.</p>
 <span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">durable</span><span class="p">[</span><span class="o">**</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">](</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]:</span>
+<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">durable</span><span class="p">[</span><span class="o">**</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">](</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Enforce durability with this decorator.</span>
 
@@ -1246,18 +1245,17 @@ transaction.</p>
         <span class="k">if</span> <span class="n">open_dbs</span> <span class="o">:=</span> <span class="n">dbs_with_open_transactions</span><span class="p">():</span>
             <span class="k">raise</span> <span class="n">_UnexpectedOpenTransaction</span><span class="p">(</span><span class="n">open_dbs</span><span class="o">=</span><span class="n">open_dbs</span><span class="p">)</span>
 
-        <span class="n">return_value</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">open_dbs</span> <span class="o">:=</span> <span class="n">dbs_with_open_transactions</span><span class="p">():</span>
-            <span class="c1"># Clean up first, otherwise we may see errors later that will mask this one.</span>
-            <span class="c1"># This can only happen if the function manually opens a transaction,</span>
-            <span class="c1"># so we need to manually roll it back and close it.</span>
-            <span class="k">for</span> <span class="n">db_alias</span> <span class="ow">in</span> <span class="n">open_dbs</span><span class="p">:</span>
-                <span class="n">django_transaction</span><span class="o">.</span><span class="n">rollback</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">db_alias</span><span class="p">)</span>
-                <span class="n">django_transaction</span><span class="o">.</span><span class="n">set_autocommit</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">using</span><span class="o">=</span><span class="n">db_alias</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">_UnexpectedDanglingTransaction</span><span class="p">(</span><span class="n">open_dbs</span><span class="o">=</span><span class="n">open_dbs</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">return_value</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">open_dbs</span> <span class="o">:=</span> <span class="n">dbs_with_open_transactions</span><span class="p">():</span>
+                <span class="c1"># Clean up first, otherwise we may see errors later that will mask this one.</span>
+                <span class="c1"># This can only happen if the function manually opens a transaction,</span>
+                <span class="c1"># so we need to manually roll it back and close it.</span>
+                <span class="k">for</span> <span class="n">db_alias</span> <span class="ow">in</span> <span class="n">open_dbs</span><span class="p">:</span>
+                    <span class="n">django_transaction</span><span class="o">.</span><span class="n">rollback</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">db_alias</span><span class="p">)</span>
+                    <span class="n">django_transaction</span><span class="o">.</span><span class="n">set_autocommit</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">using</span><span class="o">=</span><span class="n">db_alias</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">_UnexpectedDanglingTransaction</span><span class="p">(</span><span class="n">open_dbs</span><span class="o">=</span><span class="n">open_dbs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">wrapper</span>
 </code></pre></div></td></tr></table></div>
@@ -1290,7 +1288,8 @@ so this behaviour is not available from this function.</p>
 
             <details class="quote">
               <summary>Source code in <code>django_subatomic/db.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">303</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">302</span>
+<span class="normal">303</span>
 <span class="normal">304</span>
 <span class="normal">305</span>
 <span class="normal">306</span>
@@ -1327,8 +1326,7 @@ so this behaviour is not available from this function.</p>
 <span class="normal">337</span>
 <span class="normal">338</span>
 <span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_after_commit</span><span class="p">(</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_after_commit</span><span class="p">(</span>
     <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">object</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1394,7 +1392,8 @@ testcase transactions are not considered a transaction.</p>
 
             <details class="quote">
               <summary>Source code in <code>django_subatomic/db.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">360</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">359</span>
+<span class="normal">360</span>
 <span class="normal">361</span>
 <span class="normal">362</span>
 <span class="normal">363</span>
@@ -1426,8 +1425,7 @@ testcase transactions are not considered a transaction.</p>
 <span class="normal">389</span>
 <span class="normal">390</span>
 <span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">in_transaction</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">392</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">in_transaction</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return `True` if the database connection has a transaction active.</span>
 
@@ -1485,7 +1483,8 @@ testcase transactions are not considered a transaction.</p>
 
             <details class="quote">
               <summary>Source code in <code>django_subatomic/db.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">396</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">395</span>
+<span class="normal">396</span>
 <span class="normal">397</span>
 <span class="normal">398</span>
 <span class="normal">399</span>
@@ -1495,8 +1494,7 @@ testcase transactions are not considered a transaction.</p>
 <span class="normal">403</span>
 <span class="normal">404</span>
 <span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dbs_with_open_transactions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dbs_with_open_transactions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the names of databases with open transactions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
