@@ -20,7 +20,7 @@
     
     
       
-        <title>Why - Django-subatomic docs</title>
+        <title>Django's Atomic - Django-subatomic docs</title>
       
     
     
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Why
+              Django's Atomic
             
           </span>
         </div>
@@ -320,13 +320,15 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
   
   
   <span class="md-ellipsis">
-    Why
+    Django's Atomic
     
   </span>
   
@@ -339,7 +341,7 @@
   
   
   <span class="md-ellipsis">
-    Why
+    Django's Atomic
     
   </span>
   
@@ -352,6 +354,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -360,9 +364,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#djangos-atomic" class="md-nav__link">
+  <a href="#behaviours" class="md-nav__link">
     <span class="md-ellipsis">
-      Django's Atomic
+      Behaviours
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outcomes
     </span>
   </a>
   
@@ -375,14 +388,56 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-subatomic-implements" class="md-nav__link">
+    <nav class="md-nav" aria-label="Problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ambiguous-code" class="md-nav__link">
     <span class="md-ellipsis">
-      What Subatomic implements
+      Ambiguous code
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transactions-without-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transactions without context
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#savepoints-by-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      Savepoints by default
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#savepoints-as-decorators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Savepoints as decorators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-without-after-commit-callbacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests without after-commit callbacks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -571,6 +626,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -579,9 +636,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#djangos-atomic" class="md-nav__link">
+  <a href="#behaviours" class="md-nav__link">
     <span class="md-ellipsis">
-      Django's Atomic
+      Behaviours
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outcomes
     </span>
   </a>
   
@@ -594,14 +660,56 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-subatomic-implements" class="md-nav__link">
+    <nav class="md-nav" aria-label="Problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ambiguous-code" class="md-nav__link">
     <span class="md-ellipsis">
-      What Subatomic implements
+      Ambiguous code
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transactions-without-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transactions without context
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#savepoints-by-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      Savepoints by default
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#savepoints-as-decorators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Savepoints as decorators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-without-after-commit-callbacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests without after-commit callbacks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -624,66 +732,144 @@
   
 
 
-  <h1>Why</h1>
-
-<h2 id="djangos-atomic">Django's Atomic<a class="headerlink" href="#djangos-atomic" title="Permanent link">&para;</a></h2>
-<p>Django's <code>atomic</code> ensures database changes are committed together-or-not-at-all. It creates a savepoint or a transaction depending on two factors:</p>
+<h1 id="djangos-atomic">Django's Atomic<a class="headerlink" href="#djangos-atomic" title="Permanent link">&para;</a></h1>
+<p>This doc will discuss the behaviours available through Django's <code>atomic</code>
+and the outcomes people are usually trying to achieve with it.
+It goes on to outline some pitfalls that can result from using <code>atomic</code>
+and how Subatomic avoids them.</p>
+<p>Django's <code>atomic</code> ensures database changes are committed together-or-not-at-all.
+It creates a savepoint or a transaction depending on two factors:</p>
 <ul>
-<li>The arguments passed to it (<code>durable</code> and <code>savepoint</code>).</li>
+<li>The arguments passed to it (<code>durable=</code> and <code>savepoint=</code>).</li>
 <li>If a database transaction is already open.</li>
 </ul>
-<p>Specifically, the <strong>Behaviours</strong> which <code>atomic</code> exhibits are:</p>
+<h2 id="behaviours">Behaviours<a class="headerlink" href="#behaviours" title="Permanent link">&para;</a></h2>
+<p>The <em>Behaviours</em> which <code>atomic</code> exhibits are:</p>
 <table>
 <thead>
 <tr>
-<th></th>
+<th><code>savepoint=</code></th>
 <th><code>durable=False</code> (default)</th>
 <th><code>durable=True</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>savepoint=True</code> (default)</td>
+<td><strong><code>True</code> (default)</strong></td>
 <td><strong>A</strong>. Begin a transaction if needed. Creates a savepoint if already in a transaction.</td>
-<td><strong>B</strong>. Begin a transaction, or throw an error if one is already open. Never creates a savepoint. (The <code>savepoint</code> flag is ignored.)</td>
+<td><strong>B</strong>. Begin a transaction, or throw an error if one is already open. Never creates a savepoint. (The <code>savepoint=</code> flag is ignored.)</td>
 </tr>
 <tr>
-<td><code>savepoint=False</code></td>
+<td><strong><code>False</code></strong></td>
 <td><strong>C</strong>. Begin a transaction if needed. Never creates a savepoint.</td>
-<td><strong>D</strong>. Same as <strong>B</strong>.</td>
+<td>Same as <strong>B</strong>.</td>
 </tr>
 </tbody>
 </table>
-<p>Uses of <code>atomic</code> fall into three broad <strong>Categories</strong>:</p>
+<h2 id="outcomes">Outcomes<a class="headerlink" href="#outcomes" title="Permanent link">&para;</a></h2>
+<p>When people use <code>atomic</code>,
+they're generally trying to achieve one of three <em>Outcomes</em>:</p>
 <ol>
-<li>Create a <em>transaction</em> to wrap multiple changes.</li>
-<li>Create a <em>savepoint</em> so we can roll back to in order to continue with a transaction after failure.</li>
-<li>Changes to be committed <em>atomically</em>, but not specific about where the transaction is created, as long as there is one.</li>
+<li>to create a <em>transaction</em>
+   which will commit multiple changes atomically.</li>
+<li>to create a <em>savepoint</em>
+   so we can roll back to in order to continue with a transaction after failure.</li>
+<li>to indicate that changes should be committed atomically,
+   without needing to be specific about the scope of the transaction,
+   as long as there is one.</li>
 </ol>
 <h2 id="problems">Problems<a class="headerlink" href="#problems" title="Permanent link">&para;</a></h2>
-<p>Django's atomic creates many savepoints that are never used. There are a couple of main causes:</p>
-<ol>
-<li>Savepoints are created with decorators (<code>@atomic</code>).</li>
-<li>
-<p><code>atomic</code> creates savepoints by default. The default arguments (<em>Behaviour</em> <strong>A</strong>) are an <a href="https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html">attractive nuisance</a> because they make us create savepoints when we don't need them.</p>
-<blockquote>
-<p>… if you have two ways to accomplish a task and one is a simple way that <em>looks</em> like the right thing but is subtly wrong, and the other is correct but
-more complicated, the majority of people will end up doing the wrong
-thing.
-— <a href="https://blog.ganssle.io/articles/2023/01/attractive-nuisances.html"><strong>Attractive nuisances in software design</strong></a> - <a href="https://blog.ganssle.io/author/paul-ganssle.html">Paul Ganssle</a></p>
-</blockquote>
-</li>
-<li>
-<p>We have no easy way to indicate the creation of a savepoint that doesn't have the potential to create a transaction instead. The only tool we have to create a savepoint is <em>Behaviour</em> <strong>A</strong>, which can create a transaction.</p>
-</li>
-</ol>
-<h2 id="what-subatomic-implements">What Subatomic implements<a class="headerlink" href="#what-subatomic-implements" title="Permanent link">&para;</a></h2>
+<h3 id="ambiguous-code">Ambiguous code<a class="headerlink" href="#ambiguous-code" title="Permanent link">&para;</a></h3>
+<p>Ideally, we should be able to look at a line of code and say what it will do.</p>
+<p>Because <code>atomic</code>'s behaviour depends on whether a transaction is already open,
+one must know the full call stack
+to know what any particular <code>atomic</code> will do.
+If it is called in multiple code paths,
+developers must know that it will do different database operations
+depending on who calls it.</p>
+<p>Subatomic avoids this issue
+by offering an unambiguous API (<code>transaction()</code>, <code>savepoint()</code>, etc).</p>
+<h3 id="transactions-without-context">Transactions without context<a class="headerlink" href="#transactions-without-context" title="Permanent link">&para;</a></h3>
+<p>Low-level code rarely has the context to know when a transaction should be committed.
+For example, it may know that its changes must happen atomically,
+but cannot know if it is part of a larger suite of changes
+managed by higher-level code
+which must also be committed together.</p>
+<p>When low-level code uses <code>atomic</code>
+to indicate that its changes should be atomic (<em>Outcome</em> <strong>3</strong>),
+this can have one of two effects:</p>
 <ul>
-<li><code>transaction()</code>. Begin a transaction, or throw an error if a transaction is already open. Like <code>atomic(durable=True)</code>, but with added after-commit callback support in tests.</li>
-<li><code>savepoint()</code>. Create a savepoint, or throw an error if we're not already in a transaction. This is not in the table of <em>Behaviours</em> (the closest we have is <em>Behaviour</em> <strong>A</strong>, but that can create transactions).</li>
-<li><code>transaction_if_not_already()</code>. Begin a transaction if we're not already in one. Just like <em>Behaviour</em> <strong>C</strong>. This has a bit of a clunky name. This is deliberate, and reflects that it's a bit of a clunky thing to do. To be used with caution because the creation of a transaction is implicit. For a stricter alternative, see <code>transaction_required()</code> below.</li>
-<li><code>transaction_required()</code>. Throw an error if we're not already in a transaction. Does not create savepoints <em>or</em> transactions.</li>
+<li>
+<p>If the higher-level code has opened a transaction,
+  the lower-level code will create a savepoint it does not need.</p>
+</li>
+<li>
+<p>If the higher-level code has not opened a transaction,
+  the lower-level code will.
+  While this will achieve the atomicity <em>it</em> demands,
+  it fails to ensure that the larger suite of changes
+  is also atomic.</p>
+</li>
 </ul>
+<p>Django offers no APIs to indicate
+the creation of a savepoint (<em>Outcome</em> <strong>2</strong>)
+or the need for atomicity (<em>Outcome</em> <strong>3</strong>)
+that doesn't have the potential to create a transaction instead.</p>
+<p>A function decorated with Subatomic's <code>@transaction_required</code>
+will raise an error when called outside of a transaction,
+rather than run the risk of creating a transaction with the wrong scope.</p>
+<h3 id="savepoints-by-default">Savepoints by default<a class="headerlink" href="#savepoints-by-default" title="Permanent link">&para;</a></h3>
+<p><code>atomic</code> defaults to <em>Behaviour</em> <strong>A</strong>
+which creates savepoints by default
+when there is already an open transaction.</p>
+<p>It's common to decorate functions with <code>atomic</code>
+to indicate that code should be atomic (<em>Outcome</em> <strong>3</strong>),
+but neglect to pass <code>savepoint=False</code>.
+This results in more database queries than necessary.</p>
+<p>Subatomic's <code>@transaction_required</code> decorator
+gives developers an unambiguous alternative
+that will never open a savepoint.</p>
+<h3 id="savepoints-as-decorators">Savepoints as decorators<a class="headerlink" href="#savepoints-as-decorators" title="Permanent link">&para;</a></h3>
+<p>Savepoints are intrinsically linked to error handling.
+They are only required when we need
+a safe place to continue from after a failure within a transaction.
+Ideally then, the logic for catching the failure and continuing a transaction
+should be adjacent to the logic which creates the savepoint.</p>
+<p>When we use <code>atomic</code> as a decorator,
+we separate the savepoint creation from the error handling logic.
+The decorated function will not be within a <code>try:...except...:</code>.</p>
+<p>This lack of cohesion
+can make it difficult to know
+where continuing after rolling back a savepoint is intended to be handled,
+or even if it is handled at all.
+This is compounded by the fact that
+because <code>atomic</code>'s API is ambiguous,
+it can be hard to know the intended <em>Outcome</em>.</p>
+<p>To encourage putting rollback logic alongside savepoint creation,
+Subatomic's <code>savepoint</code> cannot be used as a decorator.</p>
+<h3 id="tests-without-after-commit-callbacks">Tests without after-commit callbacks<a class="headerlink" href="#tests-without-after-commit-callbacks" title="Permanent link">&para;</a></h3>
+<p>To avoid leaking state between tests,
+Django's <code>TestCase</code> runs each test within a transaction
+which gets rolled back at the end of the test.
+As a result,
+<code>atomic</code> blocks encountered during the test
+will not create transactions
+so no after-commit callbacks will be run.</p>
+<p>Even if Django wanted to simulate after-commit callbacks in tests,
+it has no way to know which <em>Outcome</em> was intended
+when it encounters an <code>atomic</code> block.
+It might be running a high-level test where a transaction is intended
+and callbacks should be run,
+or a low-level test where an open transaction is assumed
+and callbacks should <em>not</em> be run.</p>
+<p>Without Subatomic,
+developers must either manually run after-commit callbacks in tests,
+which is prone to error and omission,
+or run the test using <code>TransactionTestCase</code>,
+which can be very slow.</p>
+<p>Subatomic's <code>transaction()</code> function
+will run after-commit callbacks automatically in tests
+so that code behaves the same in tests as it does in production.</p>
 
 
 
