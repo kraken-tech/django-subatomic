@@ -59,7 +59,16 @@ def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
 
     Use of this hints at code which lacks control over the state it's called in.
 
+    Note:
+        This has a bit of a clunky name. This is a deliberate attempt to
+        discourage its use. It acts as a code-smell to highlight that places
+        which use it may need further work to achieve full control over how
+        transactions are managed.
 
+    Warning:
+        If this function is called when a transaction is already open, errors raised
+        through it will invalidate the current transaction, regardless of where
+        it was opened.
 
     Tip: Suggested alternatives
         - In functions which should not control transactions,
