@@ -347,6 +347,12 @@ def _create_unclosed_manual_transaction(db_name: str) -> None:
     django_transaction.set_autocommit(False, using=db_name)
 
 
+@db.durable
+def _create_unclosed_manual_transaction_with_error(db_name: str) -> None:
+    django_transaction.set_autocommit(False, using=db_name)
+    raise KeyError
+
+
 class TestDurable:
     @_parametrize_transaction_testcase
     def test_not_in_transaction(self) -> None:
@@ -391,6 +397,19 @@ class TestDurable:
         # An error is raised.
         with pytest.raises(db._UnexpectedDanglingTransaction) as exc_info:  # noqa: SLF001
             _create_unclosed_manual_transaction(db_name)
+
+        assert exc_info.value.open_dbs == frozenset({db_name})
+
+        # The transaction has been rolled back.
+        assert db.in_transaction(using=db_name) is False
+
+    @pytest.mark.django_db(transaction=True, databases=[DEFAULT, OTHER])
+    @pytest.mark.parametrize("db_name", [DEFAULT, OTHER])
+    def test_unclosed_manual_transaction_after_error(self, db_name: str) -> None:
+        with pytest.raises(db._UnexpectedDanglingTransaction) as exc_info:  # noqa: SLF001
+            _create_unclosed_manual_transaction_with_error(db_name)
+
+        assert isinstance(exc_info.value.__context__, KeyError)
 
         assert exc_info.value.open_dbs == frozenset({db_name})
 
