@@ -151,18 +151,17 @@ def durable[**P, R](func: Callable[P, R]) -> Callable[P, R]:
         if open_dbs := dbs_with_open_transactions():
             raise _UnexpectedOpenTransaction(open_dbs=open_dbs)
 
-        return_value = func(*args, **kwargs)
-
-        if open_dbs := dbs_with_open_transactions():
-            # Clean up first, otherwise we may see errors later that will mask this one.
-            # This can only happen if the function manually opens a transaction,
-            # so we need to manually roll it back and close it.
-            for db_alias in open_dbs:
-                django_transaction.rollback(using=db_alias)
-                django_transaction.set_autocommit(True, using=db_alias)
-            raise _UnexpectedDanglingTransaction(open_dbs=open_dbs)
-
-        return return_value
+        try:
+            return func(*args, **kwargs)
+        finally:
+            if open_dbs := dbs_with_open_transactions():
+                # Clean up first, otherwise we may see errors later that will mask this one.
+                # This can only happen if the function manually opens a transaction,
+                # so we need to manually roll it back and close it.
+                for db_alias in open_dbs:
+                    django_transaction.rollback(using=db_alias)
+                    django_transaction.set_autocommit(True, using=db_alias)
+                raise _UnexpectedDanglingTransaction(open_dbs=open_dbs)
 
     return wrapper
 
