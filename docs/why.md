@@ -8,7 +8,7 @@ It creates a savepoint or a transaction depending on two factors:
 
 ## Behaviours
 
-Specifically, the **Behaviours** which `atomic` exhibits are:
+The **Behaviours** which `atomic` exhibits are:
 
 | `savepoint=`         | `durable=False` (default) | `durable=True` |
 | ---                  | ---                       | ---            |
