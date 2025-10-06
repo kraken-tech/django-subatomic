@@ -643,13 +643,13 @@ a transaction starts with <code>BEGIN</code>
 and is committed with <code>COMMIT</code>.
 A transaction can be ended without committing using <code>ROLLBACK</code>.</p>
 <p>When using Django Subatomic,
-transactions are created with <code>django_subatomic.db.transaction</code>,
+transactions are created with <a class="autorefs autorefs-internal" title="transaction" href="../reference/django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a>,
 which can be used as both a decorator and a context manager.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>SQL does not support nested transactions,
 so nesting is not supported by <code>transaction</code>.
-It acts like <a href="https://docs.djangoproject.com/en/5.0/topics/db/transactions/#controlling-transactions-explicitly">Django's <code>atomic</code> with <code>durable=True</code></a>.</p>
+It acts like <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic">Django's <code>atomic</code> with <code>durable=True</code></a></p>
 <p>See <a href="#atomic-code"><em>Atomic code</em></a>
 for code which requires a transaction, but doesn't require partial rollback.</p>
 <p>See <a href="#savepoints"><em>Savepoints</em></a>
@@ -671,7 +671,7 @@ so that work can continue within the same transaction.</p>
 <p>In SQL terms, a savepoint is created with <code>SAVEPOINT &lt;name&gt;</code>.
 It is rolled back with <code>ROLLBACK TO &lt;name&gt;</code>
 and discarded with <code>RELEASE SAVEPOINT &lt;name&gt;</code>.</p>
-<p>Subatomic creates savepoints using <code>django_subatomic.db.savepoint</code>.
+<p>Subatomic creates savepoints using <a class="autorefs autorefs-internal" title="savepoint" href="../reference/django_subatomic/db/#django_subatomic.db.savepoint"><code>savepoint</code></a>.
 This is a context manager,
 and cannot be used as a decorator.</p>
 <div class="admonition tip">
@@ -682,20 +682,20 @@ This makes it clear that the savepoint is required, and prevents needless savepo
 <h2 id="atomic-code">Atomic code<a class="headerlink" href="#atomic-code" title="Permanent link">&para;</a></h2>
 <p>Sometimes code needs to make multiple database changes atomically
 in a place that should not be responsible for managing a transactions.</p>
-<p>Decorate this code with <code>@django_subatomic.db.transaction_required</code>
+<p>Decorate this code with <a class="autorefs autorefs-internal" title="transaction_required" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>@transaction_required</code></a>
 to make it raise an exception when someone tries to run it without first opening a transaction.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Where possible, use <code>transaction_required</code> as a decorator.</p>
+<p>Where possible, use <a class="autorefs autorefs-internal" title="transaction_required" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>transaction_required</code></a> as a decorator.</p>
 <p>This form is preferred because it fails earlier,
 and presents a clearer requirement to programmers.</p>
-<p>You can still use <code>transaction_required</code> as a context manager though.
+<p>You can still use <a class="autorefs autorefs-internal" title="transaction_required" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>transaction_required</code></a> as a context manager though.
 This might be useful in code where you cannot know the required database
 (such as when the database name is passed in as a function parameter).</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>When testing code which uses <code>transaction_required</code>
+<p>When testing code which uses <a class="autorefs autorefs-internal" title="transaction_required" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>transaction_required</code></a>,
 you might see <code>_MissingRequiredTransaction</code>
 even though tests are run in a transaction by default.</p>
 <p>While unintuitive, this is deliberate.
@@ -704,15 +704,15 @@ when they neglect to create a transaction.</p>
 <p>If you are seeing this error when testing high-level code such as a view
 then you have probably forgotten to open a transaction.</p>
 <p>The trade-off is that lower-level tests will see this error too.
-If you're testing <code>transaction_required</code> code directly,
+If you're testing <a class="autorefs autorefs-internal" title="transaction_required" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>transaction_required</code></a> code directly,
 and you're <em>sure</em> that the code shouldn't be responsible for opening a transaction,
-use the <code>django_subatomic.test.part_of_a_transaction()</code> decorator/context-manager
+use the <a class="autorefs autorefs-internal" title="part_of_a_transaction" href="../reference/django_subatomic/test/#django_subatomic.test.part_of_a_transaction"><code>part_of_a_transaction</code></a> decorator/context-manager
 to get things working.
 This will not run after-commit hooks.
 If you'd like those to run, create a <a href="#transactions">transaction</a> instead.</p>
 </div>
 <p>When "create-a-transaction-if-one-doesn't-already-exist" behaviour is required,
-the <code>transaction_if_not_already</code> function will provide it.
+the <a class="autorefs autorefs-internal" title="transaction_if_not_already" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_if_not_already"><code>transaction_if_not_already</code></a> function will provide it.
 This approach hints that transactional behaviour is not well-defined:
 the code will do different things in different contexts,
 which makes it hard to know what to expect from it.</p>

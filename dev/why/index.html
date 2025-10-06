@@ -733,18 +733,18 @@
 
 
 <h1 id="djangos-atomic">Django's Atomic<a class="headerlink" href="#djangos-atomic" title="Permanent link">&para;</a></h1>
-<p>This doc will discuss the behaviours available through Django's <code>atomic</code>
+<p>This doc will discuss the behaviours available through <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic">Django's <code>atomic</code></a>
 and the outcomes people are usually trying to achieve with it.
-It goes on to outline some pitfalls that can result from using <code>atomic</code>
+It goes on to outline some pitfalls that can result from using <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a>
 and how Subatomic avoids them.</p>
-<p>Django's <code>atomic</code> ensures database changes are committed together-or-not-at-all.
+<p>Django's <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> ensures database changes are committed together-or-not-at-all.
 It creates a savepoint or a transaction depending on two factors:</p>
 <ul>
 <li>The arguments passed to it (<code>durable=</code> and <code>savepoint=</code>).</li>
 <li>If a database transaction is already open.</li>
 </ul>
 <h2 id="behaviours">Behaviours<a class="headerlink" href="#behaviours" title="Permanent link">&para;</a></h2>
-<p>The <em>Behaviours</em> which <code>atomic</code> exhibits are:</p>
+<p>The <em>Behaviours</em> which <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> exhibits are:</p>
 <table>
 <thead>
 <tr>
@@ -767,7 +767,7 @@ It creates a savepoint or a transaction depending on two factors:</p>
 </tbody>
 </table>
 <h2 id="outcomes">Outcomes<a class="headerlink" href="#outcomes" title="Permanent link">&para;</a></h2>
-<p>When people use <code>atomic</code>,
+<p>When people use <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a>,
 they're generally trying to achieve one of three <em>Outcomes</em>:</p>
 <ol>
 <li>to create a <em>transaction</em>
@@ -781,21 +781,22 @@ they're generally trying to achieve one of three <em>Outcomes</em>:</p>
 <h2 id="problems">Problems<a class="headerlink" href="#problems" title="Permanent link">&para;</a></h2>
 <h3 id="ambiguous-code">Ambiguous code<a class="headerlink" href="#ambiguous-code" title="Permanent link">&para;</a></h3>
 <p>Ideally, we should be able to look at a line of code and say what it will do.</p>
-<p>Because <code>atomic</code>'s behaviour depends on whether a transaction is already open,
+<p>Because <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a>'s behaviour depends on whether a transaction is already open,
 one must know the full call stack
-to know what any particular <code>atomic</code> will do.
+to know what any particular <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> will do.
 If it is called in multiple code paths,
 developers must know that it will do different database operations
 depending on who calls it.</p>
 <p>Subatomic avoids this issue
-by offering an unambiguous API (<code>transaction()</code>, <code>savepoint()</code>, etc).</p>
+by offering an unambiguous API
+(<a class="autorefs autorefs-internal" title="transaction" href="../reference/django_subatomic/db/#django_subatomic.db.transaction"><code>transaction()</code></a>, <a class="autorefs autorefs-internal" title="savepoint" href="../reference/django_subatomic/db/#django_subatomic.db.savepoint"><code>savepoint()</code></a>, etc).</p>
 <h3 id="transactions-without-context">Transactions without context<a class="headerlink" href="#transactions-without-context" title="Permanent link">&para;</a></h3>
 <p>Low-level code rarely has the context to know when a transaction should be committed.
 For example, it may know that its changes must happen atomically,
 but cannot know if it is part of a larger suite of changes
 managed by higher-level code
 which must also be committed together.</p>
-<p>When low-level code uses <code>atomic</code>
+<p>When low-level code uses <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a>
 to indicate that its changes should be atomic (<em>Outcome</em> <strong>3</strong>),
 this can have one of two effects:</p>
 <ul>
@@ -815,18 +816,18 @@ this can have one of two effects:</p>
 the creation of a savepoint (<em>Outcome</em> <strong>2</strong>)
 or the need for atomicity (<em>Outcome</em> <strong>3</strong>)
 that doesn't have the potential to create a transaction instead.</p>
-<p>A function decorated with Subatomic's <code>@transaction_required</code>
+<p>A function decorated with Subatomic's <a class="autorefs autorefs-internal" title="transaction_required" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>@transaction_required</code></a>
 will raise an error when called outside of a transaction,
 rather than run the risk of creating a transaction with the wrong scope.</p>
 <h3 id="savepoints-by-default">Savepoints by default<a class="headerlink" href="#savepoints-by-default" title="Permanent link">&para;</a></h3>
-<p><code>atomic</code> defaults to <em>Behaviour</em> <strong>A</strong>
+<p><a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> defaults to <em>Behaviour</em> <strong>A</strong>
 which creates savepoints by default
 when there is already an open transaction.</p>
-<p>It's common to decorate functions with <code>atomic</code>
+<p>It's common to decorate functions with <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a>
 to indicate that code should be atomic (<em>Outcome</em> <strong>3</strong>),
 but neglect to pass <code>savepoint=False</code>.
 This results in more database queries than necessary.</p>
-<p>Subatomic's <code>@transaction_required</code> decorator
+<p>Subatomic's <a class="autorefs autorefs-internal" title="transaction_required" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>@transaction_required</code></a> decorator
 gives developers an unambiguous alternative
 that will never open a savepoint.</p>
 <h3 id="savepoints-as-decorators">Savepoints as decorators<a class="headerlink" href="#savepoints-as-decorators" title="Permanent link">&para;</a></h3>
@@ -835,7 +836,7 @@ They are only required when we need
 a safe place to continue from after a failure within a transaction.
 Ideally then, the logic for catching the failure and continuing a transaction
 should be adjacent to the logic which creates the savepoint.</p>
-<p>When we use <code>atomic</code> as a decorator,
+<p>When we use <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> as a decorator,
 we separate the savepoint creation from the error handling logic.
 The decorated function will not be within a <code>try:...except...:</code>.</p>
 <p>This lack of cohesion
@@ -843,21 +844,21 @@ can make it difficult to know
 where continuing after rolling back a savepoint is intended to be handled,
 or even if it is handled at all.
 This is compounded by the fact that
-because <code>atomic</code>'s API is ambiguous,
+because <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a>'s API is ambiguous,
 it can be hard to know the intended <em>Outcome</em>.</p>
 <p>To encourage putting rollback logic alongside savepoint creation,
-Subatomic's <code>savepoint</code> cannot be used as a decorator.</p>
+Subatomic's <a class="autorefs autorefs-internal" title="savepoint" href="../reference/django_subatomic/db/#django_subatomic.db.savepoint"><code>savepoint</code></a> cannot be used as a decorator.</p>
 <h3 id="tests-without-after-commit-callbacks">Tests without after-commit callbacks<a class="headerlink" href="#tests-without-after-commit-callbacks" title="Permanent link">&para;</a></h3>
 <p>To avoid leaking state between tests,
-Django's <code>TestCase</code> runs each test within a transaction
+Django's <a href="https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.TestCase"><code>TestCase</code></a> runs each test within a transaction
 which gets rolled back at the end of the test.
 As a result,
-<code>atomic</code> blocks encountered during the test
+<a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> blocks encountered during the test
 will not create transactions
 so no after-commit callbacks will be run.</p>
 <p>Even if Django wanted to simulate after-commit callbacks in tests,
 it has no way to know which <em>Outcome</em> was intended
-when it encounters an <code>atomic</code> block.
+when it encounters an <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> block.
 It might be running a high-level test where a transaction is intended
 and callbacks should be run,
 or a low-level test where an open transaction is assumed
@@ -865,9 +866,9 @@ and callbacks should <em>not</em> be run.</p>
 <p>Without Subatomic,
 developers must either manually run after-commit callbacks in tests,
 which is prone to error and omission,
-or run the test using <code>TransactionTestCase</code>,
+or run the test using <a href="https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.TransactionTestCase"><code>TransactionTestCase</code></a>,
 which can be very slow.</p>
-<p>Subatomic's <code>transaction()</code> function
+<p>Subatomic's <a class="autorefs autorefs-internal" title="transaction" href="../reference/django_subatomic/db/#django_subatomic.db.transaction"><code>transaction()</code></a> function
 will run after-commit callbacks automatically in tests
 so that code behaves the same in tests as it does in production.</p>
 
