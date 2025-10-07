@@ -110,7 +110,6 @@ def savepoint(*, using: str | None = None) -> Generator[None]:
 
     Raises:
         _MissingRequiredTransaction: if we are not in a transaction
-            See Note [_MissingRequiredTransaction in tests]
     """
     with (
         transaction_required(using=using),
@@ -129,8 +128,6 @@ def transaction_required(*, using: str | None = None) -> Generator[None]:
     We ignore test-suite transactions when checking for a transaction
     because we don't want to run the risk of allowing code to pass tests
     but fail in production.
-
-    See Note [_MissingRequiredTransaction in tests]
 
     Raises:
         _MissingRequiredTransaction: if we are not in a transaction.
