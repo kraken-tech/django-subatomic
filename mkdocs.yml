@@ -1,6 +1,8 @@
 site_name: Django-subatomic docs
 repo_name: kraken-tech/django-subatomic
 repo_url: https://github.com/kraken-tech/django-subatomic
+watch:
+  - src
 theme:
   name: material
   logo: static/img/logo.png
