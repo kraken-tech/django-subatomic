@@ -324,9 +324,13 @@ def run_after_commit(
     """
     Register a callback to be called after the current transaction is committed.
 
+    (Transactions created by the test suite are deliberately ignored.)
+
     If the current transaction is rolled back, the callback will not be called.
+
     By default, an error will be raised if there is no transaction open.
-    The transaction opened by tests is ignored for this purpose.
+    While you are transitioning your codebase to stricter transaction handling,
+    you may disable this with [`settings.SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION`][subatomic_after_commit_needs_transaction].
 
     Note:
         Django's `on_commit` has a `robust` parameter, which allows a callback
