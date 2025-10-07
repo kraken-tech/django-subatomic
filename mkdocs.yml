@@ -55,5 +55,6 @@ plugins:
             show_signature_type_parameters: true
   - api-autonav:
       modules: ['src/django_subatomic']
+  - autorefs
   - search
   - mike
