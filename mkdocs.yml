@@ -1,5 +1,5 @@
 site_name: Django-subatomic docs
-repo_name: kraken-tech/django-subatomic
+repo_name: Django Subatomic on GitHub
 repo_url: https://github.com/kraken-tech/django-subatomic
 watch:
   - src
