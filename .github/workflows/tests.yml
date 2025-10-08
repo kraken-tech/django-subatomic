@@ -46,6 +46,7 @@ jobs:
     - run: tox run-parallel --parallel-no-spinner
       env:
         FORCE_COLOR: "1"
+        MYPY_FORCE_COLOR: "yes"
         DEFAULT_DATABASE_URL: postgres://postgres:postgres@localhost/subatomic
         OTHER_DATABASE_URL: postgres://postgres:postgres@localhost/subatomic_other
 
