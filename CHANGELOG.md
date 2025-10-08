@@ -7,10 +7,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Added
-
-- Search plugin for MkDocs
-
 ### Fixed
 
 - Ensure cleanup actions in `durable` always happen when the wrapped code raises an unexpected error.
