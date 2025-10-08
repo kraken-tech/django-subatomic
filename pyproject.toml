@@ -36,8 +36,6 @@ classifiers = [
 ]
 
 [project.urls]
-# See https://daniel.feldroy.com/posts/2023-08-pypi-project-urls-cheatsheet for
-# additional URLs that can be included here.
 documentation = "https://kraken-tech.github.io/django-subatomic/"
 repository = "https://github.com/kraken-tech/django-subatomic"
 changelog = "https://github.com/kraken-tech/django-subatomic/blob/main/CHANGELOG.md"
