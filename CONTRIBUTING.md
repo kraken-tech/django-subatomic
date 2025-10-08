@@ -106,6 +106,9 @@ a GitHub Action runs [Mike],
 which commits a new version of the docs to the `gh-pages` branch
 so that it is deployed to [GitHub Pages].
 
+When editing our documentation, please use [semantic linefeeds][].
+(For a formal definition which we only loosely adhere to, see [sembr.org][sembr].)
+
 To build the docs locally, you will need the "docs" dependency-group installed
 (if you have already installed the "dev" group, you can skip this):
 
@@ -126,4 +129,6 @@ mkdocs serve
 [Mike]: https://github.com/jimporter/mike
 [MkDocs]: https://www.mkdocs.org/
 [keepachangelog]: https://keepachangelog.com/
+[semantic linefeeds]: https://rhodesmill.org/brandon/2012/one-sentence-per-line/
+[sembr]: https://sembr.org/
 [semver]: https://semver.org/
