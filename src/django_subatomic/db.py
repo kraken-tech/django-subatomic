@@ -33,10 +33,10 @@ def transaction(*, using: str | None = None) -> Generator[None]:
     """
     Create a database transaction.
 
+    Can be used as a decorator or a context manager.
+
     Nested calls are not allowed because SQL does not support nested transactions.
     Consider this like Django's `atomic(durable=True)`, but with added after-commit callback support in tests.
-
-    This wraps Django's 'atomic' function.
 
     Raises:
         RuntimeError: if we call this from inside another existing transaction.
@@ -55,14 +55,28 @@ def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
     """
     Create a transaction if one isn't already open.
 
+    Can be used as a decorator or a context manager.
+
     Use of this hints at code which lacks control over the state it's called in.
 
-    Suggested alternatives:
+    Note:
+        This has a bit of a clunky name. This is a deliberate attempt to
+        discourage its use. It acts as a code-smell to highlight that places
+        which use it may need further work to achieve full control over how
+        transactions are managed.
 
-    - In functions which should not control transactions, use `transaction_required`.
-      This ensures they are handled by the caller.
+    Warning:
+        If this function is called when a transaction is already open, errors raised
+        through it will invalidate the current transaction, regardless of where
+        it was opened.
 
-    - In functions which can unambiguously control transactions, use `transaction`.
+    Tip: Suggested alternatives
+        - In functions which should not control transactions,
+          use [`transaction_required`][django_subatomic.db.transaction_required].
+          This ensures they are handled by the caller.
+
+        - In functions which can unambiguously control transactions,
+          use [`transaction`][django_subatomic.db.transaction].
     """
     # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
     # This allows for a rollback when an exception propagates out of this block, and so
@@ -81,21 +95,21 @@ def savepoint(*, using: str | None = None) -> Generator[None]:
     """
     Create a database savepoint.
 
+    Can be used as a context manager, but _not_ as a decorator.
+
     Must be called inside an active transaction.
 
-    Tips:
-
-    - You should only create a savepoint if you may roll back to it before
-      continuing with your transaction. If your intention is to ensure that
-      your code is committed atomically, consider using `transaction_required`
-      instead.
-    - We believe savepoint rollback should be handled where the savepoint is created.
-      That locality is not possible with a decorator, so this function
-      deliberately does not work as one.
+    Tip: Recommended usage
+        - You should only create a savepoint if you may roll back to it before
+          continuing with your transaction. If your intention is to ensure that
+          your code is committed atomically, consider using [`transaction_required`][django_subatomic.db.transaction_required]
+          instead.
+        - We believe savepoint rollback should be handled where the savepoint is created.
+          That locality is not possible with a decorator, so this function
+          deliberately does not work as one.
 
     Raises:
         _MissingRequiredTransaction: if we are not in a transaction
-            See Note [_MissingRequiredTransaction in tests]
     """
     with (
         transaction_required(using=using),
@@ -115,8 +129,6 @@ def transaction_required(*, using: str | None = None) -> Generator[None]:
     because we don't want to run the risk of allowing code to pass tests
     but fail in production.
 
-    See Note [_MissingRequiredTransaction in tests]
-
     Raises:
         _MissingRequiredTransaction: if we are not in a transaction.
     """
@@ -131,6 +143,8 @@ def transaction_required(*, using: str | None = None) -> Generator[None]:
 def durable[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     """
     Enforce durability with this decorator.
+
+    Can be used as a decorator, but _not_ as a context manager.
 
     "Durability" means that the function's work cannot be rolled back after it completes,
     and is not to be confused with "atomicity" (which is about ensuring that the function
@@ -307,13 +321,18 @@ def run_after_commit(
     """
     Register a callback to be called after the current transaction is committed.
 
-    If the current transaction is rolled back, the callback will not be called.
-    By default, an error will be raised if there is no transaction open.
-    The transaction opened by tests is ignored for this purpose.
+    (Transactions created by the test suite are deliberately ignored.)
 
-    Note that Django's `on_commit` has a `robust` parameter, which allows a callback to fail silently.
-    Kraken has a convention to "not allow code to fail silently"
-    so this behaviour is not available from this function.
+    If the current transaction is rolled back, the callback will not be called.
+
+    By default, an error will be raised if there is no transaction open.
+    While you are transitioning your codebase to stricter transaction handling,
+    you may disable this with [`settings.SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION`][subatomic_after_commit_needs_transaction].
+
+    Note:
+        Django's `on_commit` has a `robust` parameter, which allows a callback
+        to fail silently. Kraken has a convention to "not allow code to fail
+        silently" so this behaviour is not available from this function.
     """
     if using is None:
         using = django_db.DEFAULT_DB_ALIAS

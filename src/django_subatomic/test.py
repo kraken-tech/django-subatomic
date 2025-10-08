@@ -17,9 +17,9 @@ __all__ = [
 @contextlib.contextmanager
 def part_of_a_transaction(using: str | None = None) -> Generator[None]:
     """
-    Allow calling `transaction_required` code without an explicit transaction.
+    Allow calling "transaction required" code without an explicit transaction.
 
-    This is useful for directly testing code marked with `db.transaction_required()`
+    This is useful for directly testing code marked with [`transaction_required`][django_subatomic.db.transaction_required]
     without going through other code which is responsible for managing a transaction.
 
     This works by entering a new "atomic" block, so that the inner-most "atomic"
@@ -30,9 +30,7 @@ def part_of_a_transaction(using: str | None = None) -> Generator[None]:
     than by calling this.
 
     Note that this does not handle after-commit callback simulation. If you need that,
-    consider using `django_subatomic.db.transaction` instead.
-
-    See Note [_MissingRequiredTransaction in tests]
+    use [`transaction`][django_subatomic.db.transaction] instead.
     """
     with transaction.atomic(using=using):
         yield
