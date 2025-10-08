@@ -10,6 +10,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Search plugin for MkDocs
+- Raise an error when entering `db.transaction()` (and `transaction_if_not_already()` when it opens) **if** the testcase transaction already has pending `on_commit` callbacks.  
+  Opt-out via `SUBATOMIC_RAISE_IF_PENDING_TESTCASE_ON_COMMIT_ON_ENTER` (default: `True`). (#31)
 
 ### Fixed
 

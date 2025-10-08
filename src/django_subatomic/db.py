@@ -27,6 +27,39 @@ __all__ = [
     "transaction_required",
 ]
 
+@attrs.frozen
+class _PendingTestcaseAfterCommitCallbacks(Exception):
+    pending: int
+    database: str | None = None
+
+    def __str__(self) -> str:
+        return (
+            f"{self.pending} pending on_commit() callback(s) already queued on the "
+            f"test-case transaction (db={self.database!r}). "
+            "Register on_commit() inside a real transaction or set "
+            "SUBATOMIC_RAISE_IF_PENDING_TESTCASE_ON_COMMIT_ON_ENTER=False to opt out."
+        )
+
+
+@contextlib.contextmanager
+def _error_if_pending_testcase_on_commit_callbacks(*, using: str | None = None):
+    if not getattr(
+        settings,
+        "SUBATOMIC_RAISE_IF_PENDING_TESTCASE_ON_COMMIT_ON_ENTER",
+        True,  # strict par défaut
+    ):
+        yield
+        return
+
+    if _innermost_atomic_block_wraps_testcase(using=using):
+        connection = django_transaction.get_connection(using=using)
+        pending = getattr(connection, "run_on_commit", None)
+        if pending:  # non vide => des callbacks ont été enregistrés avant
+            raise _PendingTestcaseAfterCommitCallbacks(
+                pending=len(pending),
+                database=getattr(connection, "alias", None),
+            )
+    yield
 
 @contextlib.contextmanager
 def transaction(*, using: str | None = None) -> Generator[None]:
@@ -43,11 +76,11 @@ def transaction(*, using: str | None = None) -> Generator[None]:
     """
     # Note that `savepoint=False` is not required here because
     # the `savepoint` flag is ignored when `durable` is `True`.
-    with (
-        _execute_on_commit_callbacks_in_tests(using),
-        django_transaction.atomic(using=using, durable=True),
-    ):
-        yield
+    with _error_if_pending_testcase_on_commit_callbacks(using=using):
+        with _execute_on_commit_callbacks_in_tests(using), django_transaction.atomic(
+            using=using, durable=True
+        ):
+            yield
 
 
 @contextlib.contextmanager
@@ -81,13 +114,17 @@ def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
     # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
     # This allows for a rollback when an exception propagates out of this block, and so
     # better simulates a production transaction behaviour in tests.
-    savepoint = _innermost_atomic_block_wraps_testcase(using=using)
-
-    with (
-        _execute_on_commit_callbacks_in_tests(using),
-        django_transaction.atomic(using=using, savepoint=savepoint),
-    ):
+    if in_transaction(using=using):
+        # Already in a transaction; don't open another.
         yield
+    else:
+        # If the innermost atomic block comes from the testcase, create a SAVEPOINT.
+        savepoint = _innermost_atomic_block_wraps_testcase(using=using)
+        with _error_if_pending_testcase_on_commit_callbacks(using=using):
+            with _execute_on_commit_callbacks_in_tests(using), django_transaction.atomic(
+                using=using, savepoint=savepoint
+            ):
+                yield
 
 
 @_utils.contextmanager

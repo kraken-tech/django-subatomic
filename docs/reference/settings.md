@@ -32,3 +32,13 @@ on a per-test basis.
 
 [override_settings]: https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.override_settings
 [django-settings]: https://docs.djangoproject.com/en/stable/topics/settings/
+
+
+## `SUBATOMIC_RAISE_IF_PENDING_TESTCASE_ON_COMMIT_ON_ENTER`
+
+**Default:** `True`
+
+When `True`, entering `db.transaction()` (and `transaction_if_not_already()` when it opens) **raises** if the test suite’s transaction already has pending `on_commit` callbacks.  
+This avoids accidentally flushing callbacks that were queued **before** opening an application transaction in tests.
+
+Set to `False` to keep the previous behaviour during migration.
