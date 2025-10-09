@@ -194,6 +194,102 @@ class TestOnCommitCallbacksInTests:
         assert error_raised is True
         assert counter.count == 1
 
+    @pytest.mark.parametrize(
+        "transaction_manager",
+        (db.transaction, db.transaction_if_not_already),
+    )
+    def test_unhandled_callbacks_cause_error(
+        self, transaction_manager: DBContextManager
+    ) -> None:
+        """
+        If callbacks from a previous atomic context remain, raise an error.
+        """
+        counter = Counter()
+
+        # Django's `atomic` leaves unhandled after-commit actions on exit.
+        with django_transaction.atomic():
+            db.run_after_commit(counter.increment)
+
+        # `transaction` will raise when it finds the unhandled callback.
+        with pytest.raises(db._UnhandledCallbacks) as exc_info:  # noqa: SLF001
+            with transaction_manager():
+                ...
+
+        assert counter.count == 0
+        assert exc_info.value.callbacks == (counter.increment,)
+
+    @pytest.mark.parametrize(
+        "transaction_manager",
+        (db.transaction, db.transaction_if_not_already),
+    )
+    def test_unhandled_callbacks_check_can_be_disabled(
+        self, transaction_manager: DBContextManager
+    ) -> None:
+        """
+        We can disable the check for unhandled callbacks.
+        """
+        counter = Counter()
+
+        # Django's `atomic` leaves unhandled after-commit actions on exit.
+        with django_transaction.atomic():
+            db.run_after_commit(counter.increment)
+
+        # Run after-commit callbacks when `transaction` exits,
+        # even if that means running them later than is realistic.
+        with override_settings(
+            SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS=False
+        ):
+            with transaction_manager():
+                assert counter.count == 0
+
+        assert counter.count == 1
+
+    @pytest.mark.parametrize(
+        "transaction_manager",
+        (db.transaction, db.transaction_if_not_already),
+    )
+    def test_handled_callbacks_are_not_an_error(
+        self, transaction_manager: DBContextManager
+    ) -> None:
+        """
+        Already-handled checks do not cause an error.
+        """
+        counter = Counter()
+
+        # Callbacks are handled by `transaction` and removed from the queue.
+        with db.transaction():
+            db.run_after_commit(counter.increment)
+            assert counter.count == 0
+        assert counter.count == 1
+
+        # The callbacks have been handled, so a second `transaction` does not raise.
+        with transaction_manager():
+            pass
+
+        # The callback was not run a second time.
+        assert counter.count == 1
+
+    @pytest.mark.parametrize(
+        "transaction_manager",
+        (db.transaction, db.transaction_if_not_already),
+    )
+    def test_callbacks_ignored_by_transaction_if_not_already(
+        self, transaction_manager: DBContextManager
+    ) -> None:
+        """
+        `transaction_if_not_already` ignores after-commit callbacks if a transaction already exists.
+        """
+        counter = Counter()
+
+        with transaction_manager():
+            db.run_after_commit(counter.increment)
+            with db.transaction_if_not_already():
+                assert counter.count == 0
+            assert counter.count == 0
+
+        # The callback is run when the outermost transaction exits.
+        assert counter.count == 1
+
 
 class TestTransactionRequired:
     @_parametrize_transaction_testcase

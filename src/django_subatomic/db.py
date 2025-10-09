@@ -194,11 +194,25 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Generator
     - Django 4.2's `run_and_clear_commit_hooks` function:
         https://github.com/django/django/blob/stable/4.2.x/django/db/backends/base/base.py#L762-L779
     """
+    only_in_testcase_transaction = _innermost_atomic_block_wraps_testcase(using=using)
+
+    if (
+        getattr(
+            settings, "SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS", True
+        )
+        and only_in_testcase_transaction
+    ):
+        connection = django_transaction.get_connection(using)
+        callbacks = connection.run_on_commit
+        if callbacks:
+            raise _UnhandledCallbacks(tuple(callback for _, callback, _ in callbacks))
+
     yield
+
     if (
         # See Note [Running after-commit callbacks in tests]
         getattr(settings, "SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", True)
-        and _innermost_atomic_block_wraps_testcase(using=using)
+        and only_in_testcase_transaction
     ):
         connection = django_transaction.get_connection(using)
         callbacks = connection.run_on_commit
@@ -282,6 +296,20 @@ class _UnexpectedDanglingTransaction(Exception):
     """
 
     open_dbs: frozenset[str]
+
+
+@attrs.frozen
+class _UnhandledCallbacks(Exception):
+    """
+    Raised in tests when unhandled callbacks are found before opening a transaction.
+
+    This happens when after-commit callbacks are registered
+    but not run before trying to open a database transaction.
+
+    The best solution is to ensure the after-commit callbacks are run.
+    """
+
+    callbacks: tuple[Callable[[], object], ...]
 
 
 # Note [After-commit callbacks require a transaction]

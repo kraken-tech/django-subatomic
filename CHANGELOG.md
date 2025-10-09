@@ -10,6 +10,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Django 6.0 has been added to the test matrix.
+- In tests, an error will now be raised when opening a transaction if there are pre-existing unhandled after-commit callbacks.
+  The pre-existing callbacks would previously run when `transaction` exits.
+  This helps catch order-of-execution bugs in tests.
+  The error can be silenced by setting the `SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS` setting to `False`
+  to facilitate gradual adoption of this stricter rule.
 
 ### Fixed
 
