@@ -7,6 +7,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- An error will be raised when opening a transaction if there are pre-existing unhandled after-commit callbacks.
+  The pre-existing callbacks would previously run when `transaction` exits.
+  This helps catch order-of-execution bugs in tests.
+  The old behavior can be restored using `settings.SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS`
+  to facilitate gradual adoption of this stricter rule.
+
 ### Fixed
 
 - Ensure cleanup actions in `durable` always happen when the wrapped code raises an unexpected error.
