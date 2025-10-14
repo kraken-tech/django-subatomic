@@ -36,6 +36,10 @@ which can be used as both a decorator and a context manager.
     Working inside a transaction may not isolate you from changes made outside the transaction.
     For more info see [Transaction Isolation] in PostgreSQL's docs.
 
+### Testing
+
+By default, [Django's `TestCase`][TestCase] runs all tests in a transaction. Django Subatomic hooks into Django's test infrastructure to make this test transaction completely transparent. This allows realistic testing of code using [`transaction`][django_subatomic.db.transaction] without needing [Django's `TransactionTestCase`][TransactionTestCase].
+
 ## Savepoints
 
 A savepoint is a mark inside a transaction
@@ -108,3 +112,5 @@ which makes it hard to know what to expect from it.
 
 [transaction isolation]: https://www.postgresql.org/docs/current/transaction-iso.html
 [django-atomic]: https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic
+[TestCase]: https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.TestCase
+[TransactionTestCase]: https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.TransactionTestCase
