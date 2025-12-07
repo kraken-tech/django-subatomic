@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Django 6.0 has been added to the test matrix.
+
 ### Fixed
 
 - Ensure cleanup actions in `durable` always happen when the wrapped code raises an unexpected error.
