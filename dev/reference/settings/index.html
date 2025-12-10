@@ -516,6 +516,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#subatomic_catch_unhandled_after_commit_callbacks_in_tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -710,6 +721,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#subatomic_catch_unhandled_after_commit_callbacks_in_tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -752,6 +774,21 @@ context is exited.</p>
 progressively enable after-commit callbacks in tests
 by using <a href="https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.override_settings"><code>override_settings</code></a>
 on a per-test basis.</p>
+<h2 id="subatomic_catch_unhandled_after_commit_callbacks_in_tests"><code>SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS</code><a class="headerlink" href="#subatomic_catch_unhandled_after_commit_callbacks_in_tests" title="Permanent link">&para;</a></h2>
+<p>(default: <code>True</code>)</p>
+<p><a class="autorefs autorefs-internal" title="transaction" href="../django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a>
+will raise <code>_UnhandledCallbacks</code> in tests
+if it detects any lingering unhandled after-commit callbacks
+when it's called.
+Note: because this exception represents a programming error,
+it starts with an underscore to discourage anyone from catching it.</p>
+<p>This highlights order-of-execution issues in tests
+caused by after-commit callbacks having not been run.
+This can only happen in tests without after-commit callback simulation
+(such as those using Django's <code>atomic</code> directly),
+because in live systems after commit callbacks are always handled or discarded.</p>
+<p>The error can be silenced by setting this to <code>False</code>,
+in which case, the lingering callbacks will be run by the transaction after it commits.</p>
 
 
 
