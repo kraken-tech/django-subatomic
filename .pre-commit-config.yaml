@@ -18,7 +18,7 @@ repos:
       - id: trailing-whitespace # Trims trailing whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.8
+    rev: v0.14.9
     hooks:
       - id: ruff # Run `ruff` linter
         name: Check 'ruff linter' passes
