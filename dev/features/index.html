@@ -9,28 +9,28 @@
       
       
       
-        <link rel="prev" href="../../why/">
+        <link rel="prev" href="..">
       
       
-        <link rel="next" href="../django_subatomic/">
+        <link rel="next" href="../testing-after-commit-callbacks/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>Settings - Django-subatomic docs</title>
+        <title>Features - Django-subatomic docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,11 +49,11 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../static/css/theme.css">
+      <link rel="stylesheet" href="../static/css/theme.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#settings" class="md-skip">
+        <a href="#features" class="md-skip">
           Skip to content
         </a>
       
@@ -98,9 +98,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Django-subatomic docs" class="md-header__button md-logo" aria-label="Django-subatomic docs" data-md-component="logo">
+    <a href=".." title="Django-subatomic docs" class="md-header__button md-logo" aria-label="Django-subatomic docs" data-md-component="logo">
       
-  <img src="../../static/img/logo.png" alt="logo">
+  <img src="../static/img/logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -117,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Settings
+              Features
             
           </span>
         </div>
@@ -243,9 +243,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Django-subatomic docs" class="md-nav__button md-logo" aria-label="Django-subatomic docs" data-md-component="logo">
+    <a href=".." title="Django-subatomic docs" class="md-nav__button md-logo" aria-label="Django-subatomic docs" data-md-component="logo">
       
-  <img src="../../static/img/logo.png" alt="logo">
+  <img src="../static/img/logo.png" alt="logo">
 
     </a>
     Django-subatomic docs
@@ -272,7 +272,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -296,10 +296,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../features/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -315,6 +342,109 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#intentional-transaction-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intentional transaction management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Intentional transaction management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unambiguous-transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unambiguous transactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#require-atomicity-separately-from-transaction-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Require atomicity separately from transaction management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#require-durability-without-creating-a-transaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Require durability without creating a transaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#no-immediate-after-commit-callbacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No immediate "after-commit" callbacks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#more-realistic-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        More realistic tests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#progressive-integration-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Progressive integration support
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -326,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../testing-after-commit-callbacks/" class="md-nav__link">
+      <a href="../testing-after-commit-callbacks/" class="md-nav__link">
         
   
   
@@ -353,7 +483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../transactions-savepoints-and-atomic/" class="md-nav__link">
+      <a href="../transactions-savepoints-and-atomic/" class="md-nav__link">
         
   
   
@@ -380,7 +510,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../why/" class="md-nav__link">
+      <a href="../why/" class="md-nav__link">
         
   
   
@@ -404,10 +534,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -419,11 +547,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -444,7 +572,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -459,37 +587,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Settings
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../reference/settings/" class="md-nav__link">
         
   
   
@@ -505,59 +606,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#subatomic_after_commit_needs_transaction" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#subatomic_run_after_commit_callbacks_in_tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#subatomic_catch_unhandled_after_commit_callbacks_in_tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -592,7 +640,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../django_subatomic/" class="md-nav__link ">
+            <a href="../reference/django_subatomic/" class="md-nav__link ">
               
   
   
@@ -636,7 +684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../django_subatomic/db/" class="md-nav__link">
+      <a href="../reference/django_subatomic/db/" class="md-nav__link">
         
   
   
@@ -664,7 +712,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../django_subatomic/test/" class="md-nav__link">
+      <a href="../reference/django_subatomic/test/" class="md-nav__link">
         
   
   
@@ -727,10 +775,60 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#subatomic_after_commit_needs_transaction" class="md-nav__link">
+  <a href="#intentional-transaction-management" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION
+        Intentional transaction management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Intentional transaction management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unambiguous-transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unambiguous transactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#require-atomicity-separately-from-transaction-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Require atomicity separately from transaction management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#require-durability-without-creating-a-transaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Require durability without creating a transaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#no-immediate-after-commit-callbacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No immediate "after-commit" callbacks
       
     </span>
   </a>
@@ -738,10 +836,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#subatomic_run_after_commit_callbacks_in_tests" class="md-nav__link">
+  <a href="#more-realistic-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS
+        More realistic tests
       
     </span>
   </a>
@@ -749,10 +847,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#subatomic_catch_unhandled_after_commit_callbacks_in_tests" class="md-nav__link">
+  <a href="#progressive-integration-support" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS
+        Progressive integration support
       
     </span>
   </a>
@@ -779,43 +877,65 @@
   
 
 
-<h1 id="settings">Settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h1>
-<p>Django Subatomic has some custom <a href="https://docs.djangoproject.com/en/stable/topics/settings/">Django settings</a>
-to help with the process of adopting it in existing projects.</p>
-<h2 id="subatomic_after_commit_needs_transaction"><code>SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION</code><a class="headerlink" href="#subatomic_after_commit_needs_transaction" title="Permanent link">&para;</a></h2>
-<p>(default: <code>True</code>)</p>
-<p>When this setting is <code>True</code>,
-<a class="autorefs autorefs-internal" title="run_after_commit" href="../django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> will raise an exception if no transaction is open.</p>
-<p>This setting is intended to help projects
-transition to this strict behaviour
-by getting it working in tests
-before enabling it in production.</p>
-<h2 id="subatomic_run_after_commit_callbacks_in_tests"><code>SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS</code><a class="headerlink" href="#subatomic_run_after_commit_callbacks_in_tests" title="Permanent link">&para;</a></h2>
-<p>(default: <code>True</code>)</p>
-<p>When this setting is <code>True</code>,
-after-commit callbacks will be run in tests
-when a <a class="autorefs autorefs-internal" title="transaction" href="../django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a>
-(or <a class="autorefs autorefs-internal" title="transaction_if_not_already" href="../django_subatomic/db/#django_subatomic.db.transaction_if_not_already"><code>transaction_if_not_already</code></a>)
-context is exited.</p>
-<p>This setting is intended to help projects
-progressively enable after-commit callbacks in tests
-by using <a href="https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.override_settings"><code>override_settings</code></a>
-on a per-test basis.</p>
-<h2 id="subatomic_catch_unhandled_after_commit_callbacks_in_tests"><code>SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS</code><a class="headerlink" href="#subatomic_catch_unhandled_after_commit_callbacks_in_tests" title="Permanent link">&para;</a></h2>
-<p>(default: <code>True</code>)</p>
-<p><a class="autorefs autorefs-internal" title="transaction" href="../django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a>
-will raise <code>_UnhandledCallbacks</code> in tests
-if it detects any lingering unhandled after-commit callbacks
-when it's called.
-Note: because this exception represents a programming error,
-it starts with an underscore to discourage anyone from catching it.</p>
-<p>This highlights order-of-execution issues in tests
-caused by after-commit callbacks having not been run.
-This can only happen in tests without after-commit callback simulation
-(such as those using Django's <code>atomic</code> directly),
-because in live systems after commit callbacks are always handled or discarded.</p>
-<p>The error can be silenced by setting this to <code>False</code>,
-in which case, the lingering callbacks will be run by the transaction after it commits.</p>
+<h1 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h1>
+<h2 id="intentional-transaction-management">Intentional transaction management<a class="headerlink" href="#intentional-transaction-management" title="Permanent link">&para;</a></h2>
+<p>Django Subatomic grants precise control over:</p>
+<ul>
+<li>the creation of database <a href="../transactions-savepoints-and-atomic/">transactions and savepoints</a>,</li>
+<li>requirements for <a href="https://en.wikipedia.org/wiki/ACID">atomicity and durability</a>.</li>
+</ul>
+<h3 id="unambiguous-transactions">Unambiguous transactions<a class="headerlink" href="#unambiguous-transactions" title="Permanent link">&para;</a></h3>
+<p>Subatomic's <a class="autorefs autorefs-internal" title="transaction" href="../reference/django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a>
+unambiguously starts a new database transaction,
+unlike Django's <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> which sometimes creates a savepoint.</p>
+<p>The exact behaviour of <code>atomic</code> can be tricky to reason about,
+and can lead to <a href="../why/">subtle bugs</a>.
+By using Subatomic to explicitly express desired behaviour,
+developers are empowered to avoid these bugs.</p>
+<h3 id="require-atomicity-separately-from-transaction-management">Require atomicity separately from transaction management<a class="headerlink" href="#require-atomicity-separately-from-transaction-management" title="Permanent link">&para;</a></h3>
+<p>Subatomic's <a class="autorefs autorefs-internal" title="transaction_required" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>transaction_required</code></a> decorator
+allows developers to decouple code which must be run in a transaction
+from code which is responsible for the management of that transaction.</p>
+<p>Using this instead of an <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> decorator also
+prevents the <a href="../why/">accidental creation of unnecessary savepoints</a>
+when a transaction is already open.
+Subatomic provides the <a class="autorefs autorefs-internal" title="savepoint" href="../reference/django_subatomic/db/#django_subatomic.db.savepoint"><code>savepoint</code></a> context manager
+for when savepoints <em>are</em> necessary.</p>
+<h3 id="require-durability-without-creating-a-transaction">Require durability without creating a transaction<a class="headerlink" href="#require-durability-without-creating-a-transaction" title="Permanent link">&para;</a></h3>
+<p>Subatomic provides the <a class="autorefs autorefs-internal" title="durable" href="../reference/django_subatomic/db/#django_subatomic.db.durable"><code>durable</code></a> decorator
+to ensure that a function is called <a href="https://en.wikipedia.org/wiki/ACID#Durability">durably</a>
+without starting a database transaction at the same time.</p>
+<h2 id="no-immediate-after-commit-callbacks">No immediate "after-commit" callbacks<a class="headerlink" href="#no-immediate-after-commit-callbacks" title="Permanent link">&para;</a></h2>
+<p>Subatomic's <a class="autorefs autorefs-internal" title="run_after_commit" href="../reference/django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> will ensure that
+after-commit callbacks are only registered when a transaction is open.
+If no transaction is open, an error will be raised.
+This can expose that a transaction is missing or open on a different database,
+and prevents code from reading as though a callback will be deferred when it won't be.</p>
+<p>This is in contrast to the default behaviour of Django's <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.on_commit"><code>on_commit</code></a> function,
+where after-commit callbacks outside of transactions are run immediately.</p>
+<h2 id="more-realistic-tests">More realistic tests<a class="headerlink" href="#more-realistic-tests" title="Permanent link">&para;</a></h2>
+<p>Usually,
+Django tests are each wrapped in a transaction
+which is rolled back when the test completes,
+meaning after-commit callbacks are not run.</p>
+<p>To simulate realistic production behaviour,
+Subatomic runs after-commit callbacks when exiting the
+outermost <a class="autorefs autorefs-internal" title="transaction" href="../reference/django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a>
+(or <a class="autorefs autorefs-internal" title="transaction_if_not_already" href="../reference/django_subatomic/db/#django_subatomic.db.transaction_if_not_already"><code>transaction_if_not_already</code></a>) context.
+This emulates how the application will behave when deployed
+and means that tests reproduce realistic application behaviour
+without resorting to <a href="../testing-after-commit-callbacks/">other more costly or error-prone testing strategies</a>.</p>
+<h2 id="progressive-integration-support">Progressive integration support<a class="headerlink" href="#progressive-integration-support" title="Permanent link">&para;</a></h2>
+<p>The larger your project is,
+the more likely you are to benefit from
+the guardrails offered by Django Subatomic's strict features.
+Paradoxically, the larger your project is,
+the more difficult it may be to enable them all.</p>
+<p>Integrating Django Subatomic all at once
+could be a daunting task for larger projects,
+so we provide some <a href="../reference/settings/">settings to ease the process</a>.
+These allow you to progressively roll out strict behaviour
+on a per-test or per-feature basis.</p>
 
 
 
@@ -865,10 +985,10 @@ in which case, the lingering callbacks will be run by the transaction after it c
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": ["latest"], "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": ["latest"], "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
