@@ -279,6 +279,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Django Subatomic
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         
   
@@ -295,6 +313,58 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick comparison
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -646,6 +716,47 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick comparison
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -665,11 +776,108 @@
 
 
 <h1 id="django-subatomic">Django Subatomic<a class="headerlink" href="#django-subatomic" title="Permanent link">&para;</a></h1>
-<p>Django Subatomic enables precise control over transaction logic in Django.</p>
+<p>Subatomic splits <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic">Django's <code>atomic</code></a> into a suite of more specific utilities.
+It offers precise control over transaction logic in Django projects
+and transaction simulation in tests.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>django-subatomic
+</code></pre></div>
+<h2 id="quick-comparison">Quick comparison<a class="headerlink" href="#quick-comparison" title="Permanent link">&para;</a></h2>
+<p>Subatomic's utilities don't exactly map one-to-one to Django's transactions API,
+but the table below is broadly representative.
+See the footnotes for some nuance
+and the linked API docs for full details.</p>
+<table>
+<thead>
+<tr>
+<th>Desired outcome</th>
+<th>Django</th>
+<th>Subatomic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create transaction</td>
+<td><code>atomic()</code><sup id="fnref:atomic"><a class="footnote-ref" href="#fn:atomic">1</a></sup></td>
+<td><a class="autorefs autorefs-internal" title="transaction" href="reference/django_subatomic/db/#django_subatomic.db.transaction"><code>transaction()</code></a><sup id="fnref:transaction"><a class="footnote-ref" href="#fn:transaction">2</a></sup></td>
+</tr>
+<tr>
+<td>Create savepoint</td>
+<td><code>atomic()</code><sup id="fnref2:atomic"><a class="footnote-ref" href="#fn:atomic">1</a></sup></td>
+<td><a class="autorefs autorefs-internal" title="savepoint" href="reference/django_subatomic/db/#django_subatomic.db.savepoint"><code>savepoint()</code></a><sup id="fnref:savepoint"><a class="footnote-ref" href="#fn:savepoint">3</a></sup></td>
+</tr>
+<tr>
+<td>Run in a transaction</td>
+<td><code>atomic()</code><sup id="fnref3:atomic"><a class="footnote-ref" href="#fn:atomic">1</a></sup></td>
+<td><a class="autorefs autorefs-internal" title="transaction_required" href="reference/django_subatomic/db/#django_subatomic.db.transaction_required"><code>transaction_required()</code></a><sup id="fnref:transaction_required"><a class="footnote-ref" href="#fn:transaction_required">4</a></sup></td>
+</tr>
+<tr>
+<td>Fail if in a transaction</td>
+<td><code>assert not connection.in_atomic_block</code></td>
+<td><a class="autorefs autorefs-internal" title="durable" href="reference/django_subatomic/db/#django_subatomic.db.durable"><code>@durable</code></a><sup id="fnref:durable"><a class="footnote-ref" href="#fn:durable">5</a></sup></td>
+</tr>
+<tr>
+<td>Run after transaction completes</td>
+<td><code>transaction.on_commit()</code></td>
+<td><a class="autorefs autorefs-internal" title="run_after_commit" href="reference/django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit()</code></a><sup id="fnref:run_after_commit"><a class="footnote-ref" href="#fn:run_after_commit">6</a></sup></td>
+</tr>
+</tbody>
+</table>
+<h2 id="further-reading">Further reading<a class="headerlink" href="#further-reading" title="Permanent link">&para;</a></h2>
 <ul>
-<li>To read about why Django Subatomic exists, see <a href="why/">Django's Atomic</a>.</li>
-<li>For how to use Django Subatomic, see <a href="transactions-savepoints-and-atomic/">Transactions and Savepoints</a>.</li>
+<li>
+<p><a href="features/">Subatomic's features</a>.</p>
+</li>
+<li>
+<p><a href="transactions-savepoints-and-atomic/">The difference between transactions and savepoints</a>.</p>
+</li>
+<li>
+<p><a href="why/">Problems with Django's <code>atomic</code></a>.</p>
+</li>
+<li>
+<p><a href="testing-after-commit-callbacks/">Testing after-commit callbacks</a>.</p>
+</li>
 </ul>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:atomic">
+<p>Django's <code>atomic</code> creates a savepoint or a transaction depending on two factors:</p>
+<ul>
+<li>The arguments passed to it (<code>durable=</code> and <code>savepoint=</code>).</li>
+<li>If a database transaction is already open.</li>
+</ul>
+<p>For more info, see <a href="why/">Django's atomic</a>.&#160;<a class="footnote-backref" href="#fnref:atomic" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:atomic" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:atomic" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:transaction">
+<p>Unlike <code>atomic</code>,
+which will create a savepoint if a transaction is already open,
+<code>transaction</code> ensures the database is not already in a transaction.&#160;<a class="footnote-backref" href="#fnref:transaction" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:savepoint">
+<p>Unlike <code>atomic</code>,
+which may create a transaction,
+<code>savepoint</code> ensures the database has an active transaction.&#160;<a class="footnote-backref" href="#fnref:savepoint" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:transaction_required">
+<p>This ensures that some code is atomic
+by requiring that a transaction is already open.
+Unlike <code>atomic</code>, this never creates a transaction or a savepoint.&#160;<a class="footnote-backref" href="#fnref:transaction_required" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:durable">
+<p>This ensures that code
+may choose to manage its own transactions
+by requiring that a transaction is not already open.</p>
+<p>Note: This shouldn't be confused with <code>atomic(durable=True)</code>;
+this never creates a transaction.&#160;<a class="footnote-backref" href="#fnref:durable" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:run_after_commit">
+<p>Unlike <code>transaction.on_commit()</code>,
+this prevents misleading code
+by raising an error if there is no transaction open.&#160;<a class="footnote-backref" href="#fnref:run_after_commit" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 
@@ -719,7 +927,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.indexes"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": ["latest"], "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["content.footnote.tooltips", "navigation.indexes"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": ["latest"], "provider": "mike"}}</script>
     
     
       <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
