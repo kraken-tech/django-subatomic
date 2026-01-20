@@ -21,7 +21,7 @@ authors = [
 ]
 maintainers = [
   {name = "Charlie Denton", email = "charlie@meshy.co.uk"},
-  {name = "Lily Acorn", email = "lily.acorn@kraken.tech"},
+  {name = "Lily", email = "code@lilyf.org"},
   {name = "Samuel Searles-Bryant", email = "sam@samueljsb.co.uk"},
 ]
 
