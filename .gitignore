@@ -15,6 +15,7 @@ dist/
 # Testing
 .pytest_cache/
 .tox/
+.coverage*
 
 # Environments
 .python-version
