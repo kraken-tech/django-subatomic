@@ -118,6 +118,25 @@ class TestTransaction:
         assert was_called is True
         assert django_transaction.get_autocommit() is True
 
+    @pytest.mark.django_db(transaction=True)
+    def test_decorator_without_parentheses(self) -> None:
+        """
+        `transaction` can be used as a decorator without parentheses.
+        """
+        was_called = False
+
+        @db.transaction
+        def inner() -> None:
+            assert django_transaction.get_autocommit() is False
+            nonlocal was_called
+            was_called = True
+
+        assert django_transaction.get_autocommit() is True
+        inner()
+
+        assert was_called is True
+        assert django_transaction.get_autocommit() is True
+
     def test_works_in_tests(self) -> None:
         """
         Tests can call `db.transaction` without a fuss.
@@ -318,6 +337,20 @@ class TestTransactionRequired:
         assert exc.value.database == DEFAULT
 
     @_parametrize_transaction_testcase
+    def test_decorator_without_parentheses_fails_when_not_in_transaction(self) -> None:
+        """
+        An error is raised when we're not in a transaction.
+        """
+
+        @db.transaction_required
+        def inner() -> None: ...
+
+        with pytest.raises(db._MissingRequiredTransaction) as exc:  # noqa: SLF001
+            inner()
+
+        assert exc.value.database == DEFAULT
+
+    @_parametrize_transaction_testcase
     def test_no_error_when_in_transaction(self) -> None:
         """
         No error is raised when we're in a transaction.
@@ -431,6 +464,44 @@ class TestTransactionIfNotAlready:
 
         with django_db.connections["default"].cursor() as cursor:
             cursor.execute("SELECT 1")
+
+    @pytest.mark.django_db(transaction=True)
+    def test_decorator(self) -> None:
+        """
+        `transaction_if_not_already` can be used as a decorator.
+        """
+        was_called = False
+
+        @db.transaction_if_not_already()
+        def inner() -> None:
+            assert django_transaction.get_autocommit() is False
+            nonlocal was_called
+            was_called = True
+
+        assert django_transaction.get_autocommit() is True
+        inner()
+
+        assert was_called is True
+        assert django_transaction.get_autocommit() is True
+
+    @pytest.mark.django_db(transaction=True)
+    def test_decorator_without_parentheses(self) -> None:
+        """
+        `transaction_if_not_already` can be used as a decorator without parentheses.
+        """
+        was_called = False
+
+        @db.transaction_if_not_already
+        def inner() -> None:
+            assert django_transaction.get_autocommit() is False
+            nonlocal was_called
+            was_called = True
+
+        assert django_transaction.get_autocommit() is True
+        inner()
+
+        assert was_called is True
+        assert django_transaction.get_autocommit() is True
 
 
 @db.durable

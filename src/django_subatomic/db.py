@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import functools
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 import attrs
 from django import db as django_db
@@ -28,8 +28,21 @@ __all__ = [
 ]
 
 
-@contextlib.contextmanager
-def transaction(*, using: str | None = None) -> Generator[None]:
+@overload
+def transaction(
+    func: None = None, *, using: str | None = None
+) -> contextlib._GeneratorContextManager[None, None, None]: ...
+
+
+@overload
+def transaction[**P, R](
+    func: Callable[P, R], *, using: str | None = None
+) -> Callable[P, R]: ...
+
+
+def transaction[**P, R](
+    func: Callable[P, R] | None = None, *, using: str | None = None
+) -> contextlib._GeneratorContextManager[None, None, None] | Callable[P, R]:
     """
     Create a database transaction.
 
@@ -41,17 +54,38 @@ def transaction(*, using: str | None = None) -> Generator[None]:
     Raises:
         RuntimeError: if we call this from inside another existing transaction.
     """
-    # Note that `savepoint=False` is not required here because
-    # the `savepoint` flag is ignored when `durable` is `True`.
-    with (
-        _execute_on_commit_callbacks_in_tests(using),
-        django_transaction.atomic(using=using, durable=True),
-    ):
-        yield
+
+    @contextlib.contextmanager
+    def _transaction(*, using: str | None) -> Generator[None]:
+        # Note that `savepoint=False` is not required here because
+        # the `savepoint` flag is ignored when `durable` is `True`.
+        with (
+            _execute_on_commit_callbacks_in_tests(using),
+            django_transaction.atomic(using=using, durable=True),
+        ):
+            yield
+
+    decorator = _transaction(using=using)
+    if func is None:
+        return decorator
+    return decorator(func)
 
 
-@contextlib.contextmanager
-def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
+@overload
+def transaction_if_not_already(
+    func: None = None, *, using: str | None = None
+) -> contextlib._GeneratorContextManager[None, None, None]: ...
+
+
+@overload
+def transaction_if_not_already[**P, R](
+    func: Callable[P, R], *, using: str | None = None
+) -> Callable[P, R]: ...
+
+
+def transaction_if_not_already[**P, R](
+    func: Callable[P, R] | None = None, *, using: str | None = None
+) -> contextlib._GeneratorContextManager[None, None, None] | Callable[P, R]:
     """
     Create a transaction if one isn't already open.
 
@@ -78,16 +112,24 @@ def transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
         - In functions which can unambiguously control transactions,
           use [`transaction`][django_subatomic.db.transaction].
     """
-    # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
-    # This allows for a rollback when an exception propagates out of this block, and so
-    # better simulates a production transaction behaviour in tests.
-    savepoint = _innermost_atomic_block_wraps_testcase(using=using)
 
-    with (
-        _execute_on_commit_callbacks_in_tests(using),
-        django_transaction.atomic(using=using, savepoint=savepoint),
-    ):
-        yield
+    @contextlib.contextmanager
+    def _transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
+        # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
+        # This allows for a rollback when an exception propagates out of this block, and so
+        # better simulates a production transaction behaviour in tests.
+        savepoint = _innermost_atomic_block_wraps_testcase(using=using)
+
+        with (
+            _execute_on_commit_callbacks_in_tests(using),
+            django_transaction.atomic(using=using, savepoint=savepoint),
+        ):
+            yield
+
+    decorator = _transaction_if_not_already(using=using)
+    if func is None:
+        return decorator
+    return decorator(func)
 
 
 @_utils.contextmanager
@@ -118,8 +160,21 @@ def savepoint(*, using: str | None = None) -> Generator[None]:
         yield
 
 
-@contextlib.contextmanager
-def transaction_required(*, using: str | None = None) -> Generator[None]:
+@overload
+def transaction_required(
+    func: None = None, *, using: str | None = None
+) -> contextlib._GeneratorContextManager[None, None, None]: ...
+
+
+@overload
+def transaction_required[**P, R](
+    func: Callable[P, R], *, using: str | None = None
+) -> Callable[P, R]: ...
+
+
+def transaction_required[**P, R](
+    func: Callable[P, R] | None = None, *, using: str | None = None
+) -> contextlib._GeneratorContextManager[None, None, None] | Callable[P, R]:
     """
     Make sure that code is always executed in a transaction.
 
@@ -132,12 +187,20 @@ def transaction_required(*, using: str | None = None) -> Generator[None]:
     Raises:
         _MissingRequiredTransaction: if we are not in a transaction.
     """
-    if using is None:
-        using = django_db.DEFAULT_DB_ALIAS
 
-    if not in_transaction(using=using):
-        raise _MissingRequiredTransaction(database=using)
-    yield
+    @contextlib.contextmanager
+    def _transaction_required(*, using: str | None = None) -> Generator[None]:
+        if using is None:
+            using = django_db.DEFAULT_DB_ALIAS
+
+        if not in_transaction(using=using):
+            raise _MissingRequiredTransaction(database=using)
+        yield
+
+    decorator = _transaction_required(using=using)
+    if func is None:
+        return decorator
+    return decorator(func)
 
 
 def durable[**P, R](func: Callable[P, R]) -> Callable[P, R]:

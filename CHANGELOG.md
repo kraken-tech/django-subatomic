@@ -15,6 +15,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   This helps catch order-of-execution bugs in tests.
   The error can be silenced by setting the `SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS` setting to `False`
   to facilitate gradual adoption of this stricter rule.
+- The `transaction`, `transaction_required` and `transaction_if_not_already` decorators can now be used without parentheses. Fixes #103.
 
 ### Fixed
 
