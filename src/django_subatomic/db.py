@@ -31,7 +31,7 @@ __all__ = [
 @overload
 def transaction(
     func: None = None, *, using: str | None = None
-) -> contextlib._GeneratorContextManager[None, None, None]: ...
+) -> contextlib._GeneratorContextManager[None]: ...
 
 
 @overload
@@ -42,7 +42,7 @@ def transaction[**P, R](
 
 def transaction[**P, R](
     func: Callable[P, R] | None = None, *, using: str | None = None
-) -> contextlib._GeneratorContextManager[None, None, None] | Callable[P, R]:
+) -> contextlib._GeneratorContextManager[None] | Callable[P, R]:
     """
     Create a database transaction.
 
@@ -74,7 +74,7 @@ def transaction[**P, R](
 @overload
 def transaction_if_not_already(
     func: None = None, *, using: str | None = None
-) -> contextlib._GeneratorContextManager[None, None, None]: ...
+) -> contextlib._GeneratorContextManager[None]: ...
 
 
 @overload
@@ -85,7 +85,7 @@ def transaction_if_not_already[**P, R](
 
 def transaction_if_not_already[**P, R](
     func: Callable[P, R] | None = None, *, using: str | None = None
-) -> contextlib._GeneratorContextManager[None, None, None] | Callable[P, R]:
+) -> contextlib._GeneratorContextManager[None] | Callable[P, R]:
     """
     Create a transaction if one isn't already open.
 
@@ -163,7 +163,7 @@ def savepoint(*, using: str | None = None) -> Generator[None]:
 @overload
 def transaction_required(
     func: None = None, *, using: str | None = None
-) -> contextlib._GeneratorContextManager[None, None, None]: ...
+) -> contextlib._GeneratorContextManager[None]: ...
 
 
 @overload
@@ -174,7 +174,7 @@ def transaction_required[**P, R](
 
 def transaction_required[**P, R](
     func: Callable[P, R] | None = None, *, using: str | None = None
-) -> contextlib._GeneratorContextManager[None, None, None] | Callable[P, R]:
+) -> contextlib._GeneratorContextManager[None] | Callable[P, R]:
     """
     Make sure that code is always executed in a transaction.
 
