@@ -32,7 +32,7 @@ Run after transaction completes | `transaction.on_commit()` | [`run_after_commit
 
 - [The difference between transactions and savepoints](transactions-savepoints-and-atomic.md).
 
-- [Problems with Django's `atomic`](why.md).
+- [Problems with Django's `atomic`](django-atomic.md).
 
 - [Testing after-commit callbacks](testing-after-commit-callbacks.md).
 
@@ -43,7 +43,7 @@ Run after transaction completes | `transaction.on_commit()` | [`run_after_commit
     - The arguments passed to it (`durable=` and `savepoint=`).
     - If a database transaction is already open.
 
-    For more info, see [Django's atomic](why.md).
+    For more info, see [Django's atomic](django-atomic.md).
 
 [^transaction]:
     Unlike `atomic`,

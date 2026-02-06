@@ -14,7 +14,7 @@ unambiguously starts a new database transaction,
 unlike Django's [`atomic`][atomic] which sometimes creates a savepoint.
 
 The exact behaviour of `atomic` can be tricky to reason about,
-and can lead to [subtle bugs](why.md).
+and can lead to [subtle bugs](django-atomic.md).
 By using Subatomic to explicitly express desired behaviour,
 developers are empowered to avoid these bugs.
 
@@ -25,7 +25,7 @@ allows developers to decouple code which must be run in a transaction
 from code which is responsible for the management of that transaction.
 
 Using this instead of an [`atomic`][atomic] decorator also
-prevents the [accidental creation of unnecessary savepoints](why.md)
+prevents the [accidental creation of unnecessary savepoints](django-atomic.md)
 when a transaction is already open.
 Subatomic provides the [`savepoint`][django_subatomic.db.savepoint] context manager
 for when savepoints _are_ necessary.

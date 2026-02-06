@@ -10,6 +10,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - More context manager type annotations use simpler new Generator default types.
+- Moved docs about Django's `atomic` from `why/` to `django-atomic/`.
 
 ## [0.2.0] - 2026-01-21
 
