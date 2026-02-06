@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-06
+
 ### Changed
 
 - More context manager type annotations use simpler new Generator default types.
