@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../django-atomic/">
       
       
         <link rel="next" href="../testing-after-commit-callbacks/">
@@ -296,6 +296,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../django-atomic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Django's Atomic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -491,33 +518,6 @@
     
   
     Transactions and savepoints
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../why/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Django's Atomic
   
 
     
@@ -889,7 +889,7 @@
 unambiguously starts a new database transaction,
 unlike Django's <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> which sometimes creates a savepoint.</p>
 <p>The exact behaviour of <code>atomic</code> can be tricky to reason about,
-and can lead to <a href="../why/">subtle bugs</a>.
+and can lead to <a href="../django-atomic/">subtle bugs</a>.
 By using Subatomic to explicitly express desired behaviour,
 developers are empowered to avoid these bugs.</p>
 <h3 id="require-atomicity-separately-from-transaction-management">Require atomicity separately from transaction management<a class="headerlink" href="#require-atomicity-separately-from-transaction-management" title="Permanent link">&para;</a></h3>
@@ -897,7 +897,7 @@ developers are empowered to avoid these bugs.</p>
 allows developers to decouple code which must be run in a transaction
 from code which is responsible for the management of that transaction.</p>
 <p>Using this instead of an <a href="https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic"><code>atomic</code></a> decorator also
-prevents the <a href="../why/">accidental creation of unnecessary savepoints</a>
+prevents the <a href="../django-atomic/">accidental creation of unnecessary savepoints</a>
 when a transaction is already open.
 Subatomic provides the <a class="autorefs autorefs-internal" title="savepoint" href="../reference/django_subatomic/db/#django_subatomic.db.savepoint"><code>savepoint</code></a> context manager
 for when savepoints <em>are</em> necessary.</p>
