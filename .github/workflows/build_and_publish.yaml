@@ -84,5 +84,5 @@ jobs:
           git config --global user.email "django-subatomic+docs@example.com"
       - name: Build Docs Site
         run: |
-          mike deploy --push --update-aliases ${{ github.event.release.tag_name }} latest
+          mike deploy --push --update-aliases ${{ github.ref_name }} latest
           mike set-default latest --push
