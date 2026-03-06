@@ -352,6 +352,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#further-reading" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -745,6 +756,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#further-reading" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -823,6 +845,53 @@ and the linked API docs for full details.</p>
 </tr>
 </tbody>
 </table>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">django_subatomic</span><span class="w"> </span><span class="kn">import</span> <span class="n">db</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">register_user</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">):</span>
+<span class="hll">    <span class="c1"># Start a database transaction.</span>
+</span><span class="hll">    <span class="k">with</span> <span class="n">db</span><span class="o">.</span><span class="n">transaction</span><span class="p">():</span>
+</span>        <span class="n">create_user</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+<span class="hll">            <span class="c1"># Allow this to fail without rolling back the user creation.</span>
+</span><span class="hll">            <span class="k">with</span> <span class="n">db</span><span class="o">.</span><span class="n">savepoint</span><span class="p">():</span>
+</span>                <span class="n">enrol_with_rewards</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">EnrolmentError</span><span class="p">:</span>
+            <span class="o">...</span>
+
+
+<span class="hll"><span class="c1"># This inserts two rows, which must happen atomically (together-or-not-at-all),</span>
+</span><span class="hll"><span class="c1"># so we mark it with `transaction_required`.</span>
+</span><span class="hll"><span class="nd">@db</span><span class="o">.</span><span class="n">transaction_required</span>
+</span><span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">username</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+    <span class="n">Profile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">enrol_with_rewards</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">):</span>
+    <span class="n">do_stuff_that_might_fail</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">)</span>
+<span class="hll">    <span class="c1"># Defer sending the email until after the transaction commits successfully.</span>
+</span><span class="hll">    <span class="n">db</span><span class="o">.</span><span class="n">run_after_commit</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">send_email</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">))</span>
+</span>
+
+<span class="hll"><span class="c1"># We mark as `durable` because rolling back a transaction will not</span>
+</span><span class="hll"><span class="c1"># unsend the email.</span>
+</span><span class="hll"><span class="nd">@db</span><span class="o">.</span><span class="n">durable</span>
+</span><span class="k">def</span><span class="w"> </span><span class="nf">send_email</span><span class="p">(</span><span class="n">email</span><span class="p">):</span>
+    <span class="o">...</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Tests</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">django_subatomic</span><span class="w"> </span><span class="kn">import</span> <span class="n">test</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_create_user</span><span class="p">():</span>
+<span class="hll">    <span class="c1"># `create_user` requires a transaction, so we must emulate one in the test.</span>
+</span><span class="hll">    <span class="k">with</span> <span class="n">test</span><span class="o">.</span><span class="n">part_of_a_transaction</span><span class="p">():</span>
+</span>        <span class="n">create_user</span><span class="p">(</span><span class="s1">&#39;bob&#39;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="o">...</span>
+</code></pre></div>
 <h2 id="further-reading">Further reading<a class="headerlink" href="#further-reading" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
