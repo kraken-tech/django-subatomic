@@ -26,6 +26,59 @@ Fail if in a transaction | `assert not connection.in_atomic_block` | [`@durable`
 Run after transaction completes | `transaction.on_commit()` | [`run_after_commit()`][django_subatomic.db.run_after_commit][^run_after_commit]
 
 
+## Example
+
+```python hl_lines="5-6 10-11 17-19 27-28 31-33"
+from django_subatomic import db
+
+
+def register_user(username, email):
+    # Start a database transaction.
+    with db.transaction():
+        create_user(username)
+
+        try:
+            # Allow this to fail without rolling back the user creation.
+            with db.savepoint():
+                enrol_with_rewards(username, email)
+        except EnrolmentError:
+            ...
+
+
+# This inserts two rows, which must happen atomically (together-or-not-at-all),
+# so we mark it with `transaction_required`.
+@db.transaction_required
+def create_user(username):
+    user = User.objects.create(username=username)
+    Profile.objects.create(user=user)
+
+
+def enrol_with_rewards(username, email):
+    do_stuff_that_might_fail(username, email)
+    # Defer sending the email until after the transaction commits successfully.
+    db.run_after_commit(functools.partial(send_email, email=email))
+
+
+# We mark as `durable` because rolling back a transaction will not
+# unsend the email.
+@db.durable
+def send_email(email):
+    ...
+```
+
+```python title="Tests" hl_lines="5-6"
+from django_subatomic import test
+
+
+def test_create_user():
+    # `create_user` requires a transaction, so we must emulate one in the test.
+    with test.part_of_a_transaction():
+        create_user('bob')
+
+    assert ...
+```
+
+
 ## Further reading
 
 - [Subatomic's features](features.md).
