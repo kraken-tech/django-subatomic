@@ -60,3 +60,24 @@ jobs:
         python-version-file: '.github/workflows/.python-version'
     - run: pip install --group docs .
     - run: mkdocs build --strict
+
+  validate_commits:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    # Only check commits on PR branches, where they can be changed.
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+    - run: |
+        git fetch origin main
+        git branch main origin/main
+    - uses: actions/setup-python@v6
+      with:
+        python-version-file: '.github/workflows/.python-version'
+    - run: pip install validate_commits
+    - run: validate-commits

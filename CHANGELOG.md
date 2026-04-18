@@ -7,6 +7,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The `--since` CLI option
+  allows a base reference to be provided.
+  This facilitates checking commits since a default branch
+  that is not called 'main'.
+
 ## [1.0.0] - 2026-04-16
 
 ## [0.2.1] - 2026-02-06
