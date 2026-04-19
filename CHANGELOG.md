@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+- Added MariaDB and SQLite to the test matrix.
+
 ## [1.0.0] - 2026-04-16
 
 ## [0.2.1] - 2026-02-06
