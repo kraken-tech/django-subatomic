@@ -782,6 +782,18 @@ class TestInTransaction:
         with transaction_manager(using=DEFAULT):
             assert db.in_transaction(using=DEFAULT) is True
 
+    @pytest.mark.skipif(
+        # If database is in memory, closing the connection destroys the
+        # database. To prevent accidental data loss, Django ignores close
+        # requests on an in-memory db. Given the database is in-memory,
+        # there's no cost to maintaining an open connection, so we don't
+        # need to test that we don't open a connection here.
+        all(
+            django_db.connections[db_alias].vendor == "sqlite"
+            for db_alias in django_db.connections
+        ),
+        reason="Doesn't apply to SQLite",
+    )
     @pytest.mark.django_db(databases=[])
     def test_database_connection_not_opened(self) -> None:
         """
@@ -828,6 +840,18 @@ class TestDBsWithOpenTransaction:
 
         assert dbs == frozenset({DEFAULT, OTHER})
 
+    @pytest.mark.skipif(
+        # If database is in memory, closing the connection destroys the
+        # database. To prevent accidental data loss, Django ignores close
+        # requests on an in-memory db. Given the database is in-memory,
+        # there's no cost to maintaining an open connection, so we don't
+        # need to test that we don't open a connection here.
+        all(
+            django_db.connections[db_alias].vendor == "sqlite"
+            for db_alias in django_db.connections
+        ),
+        reason="Doesn't apply to SQLite",
+    )
     @pytest.mark.django_db(databases=[])
     def test_database_connection_not_opened(self) -> None:
         """

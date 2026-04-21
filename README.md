@@ -13,5 +13,6 @@ This package supports sensible combinations of:
 
 - Python 3.12, 3.13, 3.14.
 - Django 4.2, 5.1, 5.2, 6.0.
+- SQLite, PostgreSQL, MariaDB.
 
 [atomic]: https://docs.djangoproject.com/en/stable/topics/db/transactions/#django.db.transaction.atomic
