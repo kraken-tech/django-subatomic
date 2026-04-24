@@ -424,18 +424,9 @@ def run_after_commit(
     if using is None:
         using = django_db.DEFAULT_DB_ALIAS
 
-    # See Note [After-commit callbacks require a transaction]
-    needs_transaction = getattr(
-        settings, "SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION", True
-    )
+    _ensure_transaction_is_open(using=using)
+
     only_in_testcase_transaction = _innermost_atomic_block_wraps_testcase(using=using)
-
-    # Fail if a transaction is required, but none exists.
-    # Ignore test-suite transactions when checking for a transaction.
-    # See Note [After-commit callbacks require a transaction]
-    if needs_transaction and not in_transaction(using=using):
-        raise _MissingRequiredTransaction(database=using)
-
     if (
         # See Note [Running after-commit callbacks in tests]
         getattr(settings, "SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", True)
@@ -444,6 +435,27 @@ def run_after_commit(
         callback()
     else:
         django_transaction.on_commit(callback, using=using)
+
+
+def _ensure_transaction_is_open(*, using: str) -> None:
+    """
+    Raise an error if transactions are required but missing.
+
+    If there is no transaction open, `_MissingRequiredTransaction` is raised.
+    This can be silenced with the Django setting
+    `SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION`.
+
+    See Note [After-commit callbacks require a transaction]
+    """
+    needs_transaction = getattr(
+        settings, "SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION", True
+    )
+
+    # Fail if a transaction is required, but none exists.
+    # Ignore test-suite transactions when checking for a transaction.
+    # See Note [After-commit callbacks require a transaction]
+    if needs_transaction and not in_transaction(using=using):
+        raise _MissingRequiredTransaction(database=using)
 
 
 def _innermost_atomic_block_wraps_testcase(*, using: str | None = None) -> bool:
