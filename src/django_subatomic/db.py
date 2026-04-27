@@ -251,14 +251,18 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Generator
     - Django 4.2's `run_and_clear_commit_hooks` function:
         https://github.com/django/django/blob/stable/4.2.x/django/db/backends/base/base.py#L762-L779
     """
+    raise_unhandled_callbacks = getattr(
+        settings, "SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS", True
+    )
+    # See Note [Running after-commit callbacks in tests]
+    run_callbacks = getattr(
+        settings, "SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", True
+    )
+
     only_in_testcase_transaction = _innermost_atomic_block_wraps_testcase(using=using)
 
-    if (
-        getattr(
-            settings, "SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS", True
-        )
-        and only_in_testcase_transaction
-    ):
+
+    if raise_unhandled_callbacks and only_in_testcase_transaction:
         connection = django_transaction.get_connection(using)
         callbacks = connection.run_on_commit
         if callbacks:
@@ -266,11 +270,7 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Generator
 
     yield
 
-    if (
-        # See Note [Running after-commit callbacks in tests]
-        getattr(settings, "SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", True)
-        and only_in_testcase_transaction
-    ):
+    if run_callbacks and only_in_testcase_transaction:
         connection = django_transaction.get_connection(using)
         callbacks = connection.run_on_commit
         connection.run_on_commit = []

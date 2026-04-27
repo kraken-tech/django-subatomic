@@ -49,9 +49,11 @@ def part_of_a_transaction(using: str | None = None) -> Generator[None]:
     use [`transaction`][django_subatomic.db.transaction] instead.
     """
     connection = transaction.get_connection(using)
-    if getattr(
+    raise_unhandled_callbacks = getattr(
         settings, "SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS", True
-    ):
+    )
+
+    if raise_unhandled_callbacks:
         callbacks = connection.run_on_commit
         if callbacks:
             raise _UnhandledCallbacks(tuple(callback for _, callback, _ in callbacks))
