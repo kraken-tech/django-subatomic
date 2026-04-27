@@ -260,10 +260,9 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Generator
     )
 
     only_in_testcase_transaction = _innermost_atomic_block_wraps_testcase(using=using)
-
+    connection = django_transaction.get_connection(using)
 
     if raise_unhandled_callbacks and only_in_testcase_transaction:
-        connection = django_transaction.get_connection(using)
         callbacks = connection.run_on_commit
         if callbacks:
             raise _UnhandledCallbacks(tuple(callback for _, callback, _ in callbacks))
@@ -271,7 +270,6 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Generator
     yield
 
     if run_callbacks and only_in_testcase_transaction:
-        connection = django_transaction.get_connection(using)
         callbacks = connection.run_on_commit
         connection.run_on_commit = []
         for _, callback, robust in callbacks:
