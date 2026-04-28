@@ -57,10 +57,10 @@ def transaction[**P, R](
 
     @contextlib.contextmanager
     def _transaction(*, using: str | None) -> Generator[None]:
-        # Note that `savepoint=False` is not required here because
-        # the `savepoint` flag is ignored when `durable` is `True`.
         with (
             _execute_on_commit_callbacks_in_tests(using),
+            # Note that `savepoint=False` is not required on `atomic` because
+            # the `savepoint` flag is ignored when `durable` is `True`.
             django_transaction.atomic(using=using, durable=True),
         ):
             yield
@@ -115,13 +115,13 @@ def transaction_if_not_already[**P, R](
 
     @contextlib.contextmanager
     def _transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
-        # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
-        # This allows for a rollback when an exception propagates out of this block, and so
-        # better simulates a production transaction behaviour in tests.
         savepoint = _innermost_atomic_block_wraps_testcase(using=using)
 
         with (
             _execute_on_commit_callbacks_in_tests(using),
+            # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
+            # This allows for a rollback when an exception propagates out of this block, and so
+            # better simulates a production transaction behaviour in tests.
             django_transaction.atomic(using=using, savepoint=savepoint),
         ):
             yield
