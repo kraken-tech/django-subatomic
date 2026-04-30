@@ -32,5 +32,5 @@ def part_of_a_transaction(using: str | None = None) -> Generator[None]:
     Note that this does not handle after-commit callback simulation. If you need that,
     use [`transaction`][django_subatomic.db.transaction] instead.
     """
-    with transaction.atomic(using=using):
+    with transaction.atomic(using=using, durable=True):
         yield
