@@ -8,6 +8,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 - Added MariaDB and SQLite to the test matrix.
+- Disallowed nesting of `part_of_a_transaction` to prevent accidental
+  simulation of nested transaction behaviour in tests. Fixes #150.
 
 ## [1.0.0] - 2026-04-16
 

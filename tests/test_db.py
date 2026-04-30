@@ -413,6 +413,50 @@ class TestSavepointContextManager:
         assert release_savepoint["sql"].startswith("RELEASE SAVEPOINT ")
 
 
+class TestPartOfATransaction:
+    @pytest.mark.django_db(transaction=True)
+    def test_fails_when_nested_inside_another_part_of_a_transaction(self) -> None:
+        """
+        `part_of_a_transaction` cannot be nested inside another `part_of_a_transaction`.
+        """
+        with pytest.raises(
+            RuntimeError,
+            match=re.escape(
+                "A durable atomic block cannot be nested within another atomic block."
+            ),
+        ):
+            with test.part_of_a_transaction():
+                with test.part_of_a_transaction():
+                    ...
+
+    @pytest.mark.django_db(transaction=True)
+    def test_fails_when_nested_inside_an_atomic_block(self) -> None:
+        """
+        `part_of_a_transaction` cannot be nested inside an existing atomic block.
+        """
+        with pytest.raises(
+            RuntimeError,
+            match=re.escape(
+                "A durable atomic block cannot be nested within another atomic block."
+            ),
+        ):
+            with django_transaction.atomic():
+                with test.part_of_a_transaction():
+                    ...
+
+    @pytest.mark.django_db(transaction=True)
+    def test_creates_transaction(self) -> None:
+        """
+        A transaction is active within the context manager.
+        """
+        assert django_transaction.get_autocommit() is True
+
+        with test.part_of_a_transaction():
+            assert django_transaction.get_autocommit() is False
+
+        assert django_transaction.get_autocommit() is True
+
+
 class TestTransactionIfNotAlready:
     def test_transaction_already_exists(
         self, django_assert_num_queries: pytest_django.DjangoAssertNumQueries
