@@ -35,11 +35,14 @@ on a per-test basis.
 (default: `True`)
 
 [`transaction`][django_subatomic.db.transaction]
-will raise `_UnhandledCallbacks` in tests
-if it detects any lingering unhandled after-commit callbacks
-when it's called.
-Note: because this exception represents a programming error,
-it starts with an underscore to discourage anyone from catching it.
+and [`transaction_if_not_already`][django_subatomic.db.transaction_if_not_already]
+will raise `subatomic.db._UnhandledCallbacks` in tests
+if they detect any lingering unhandled after-commit callbacks
+when they are called.
+[`part_of_a_transaction`][django_subatomic.test.part_of_a_transaction]
+will raise `subatomic.test._UnhandledCallbacks` instead.
+Note: because these exceptions each represent a programming error,
+they start with an underscore to discourage anyone from catching them.
 
 This highlights order-of-execution issues in tests
 caused by after-commit callbacks having not been run.

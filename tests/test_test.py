@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from django.db import transaction as django_transaction
+from django.test import override_settings
 
 from django_subatomic import db, test
 
@@ -43,12 +44,67 @@ class TestPartOfATransaction:
         """
         Callbacks aren't executed when tests manage the transaction.
         """
-
-        def _callback_which_should_not_be_called() -> None:
-            pytest.fail("Callback should not have been called.")  # pragma: no cover
-
         with test.part_of_a_transaction():
             db.run_after_commit(_callback_which_should_not_be_called)
+
+    def test_dangling_callbacks_cause_an_error_on_enter(self) -> None:
+        """
+        Pre-existing callbacks will be detected and cause an error.
+        """
+        # Django's `atomic` leaves dangling after-commit callbacks
+        # on the test case's transaction.
+        with django_transaction.atomic():
+            django_transaction.on_commit(_callback_which_should_not_be_called)
+
+        # Ignoring private API here because it's the only way to test this guardrail.
+        with pytest.raises(test._UnhandledCallbacks) as exc_info:  # noqa: SLF001
+            with test.part_of_a_transaction():
+                ...
+
+        assert exc_info.value.callbacks == (_callback_which_should_not_be_called,)
+
+    def test_dangling_callbacks_detection_can_be_disabled(self) -> None:
+        """
+        Pre-existing callbacks can be ignored with a setting.
+        """
+        # Django's `atomic` leaves dangling after-commit callbacks
+        # on the test case's transaction.
+        with django_transaction.atomic():
+            django_transaction.on_commit(_callback_which_should_not_be_called)
+
+        # This setting suppresses the guardrail.
+        with override_settings(
+            SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS=False
+        ):
+            with test.part_of_a_transaction():
+                ...
+
+    def test_remaining_callbacks_cleared_on_exit(self) -> None:
+        """
+        Any callbacks left at the end of the block are cleared out.
+        """
+        with test.part_of_a_transaction():
+            db.run_after_commit(_callback_which_should_not_be_called)
+
+        # If the callbacks weren't cleared, this would raise an error.
+        with db.transaction():
+            ...
+
+    def test_remaining_callbacks_cleared_on_error(self) -> None:
+        """
+        Callbacks left at the end of the block are cleared out when an error is raised.
+        """
+
+        class _ArbitraryError(Exception): ...
+
+        with pytest.raises(_ArbitraryError):
+            with test.part_of_a_transaction():
+                db.run_after_commit(_callback_which_should_not_be_called)
+                raise _ArbitraryError
+
+        # If the callbacks weren't cleared, this would raise an error.
+        with db.transaction():
+            ...
 
     @pytest.mark.parametrize(
         "transaction_manager",
@@ -74,3 +130,7 @@ class TestPartOfATransaction:
             ):
                 with test.part_of_a_transaction():
                     ...
+
+
+def _callback_which_should_not_be_called() -> None:
+    pytest.fail("Callback should not have been called.")  # pragma: no cover
