@@ -99,11 +99,6 @@ def transaction_if_not_already[**P, R](
         which use it may need further work to achieve full control over how
         transactions are managed.
 
-    Warning:
-        If this function is called when a transaction is already open, errors raised
-        through it will invalidate the current transaction, regardless of where
-        it was opened.
-
     Tip: Suggested alternatives
         - In functions which should not control transactions,
           use [`transaction_required`][django_subatomic.db.transaction_required].
@@ -122,7 +117,8 @@ def transaction_if_not_already[**P, R](
             # better simulates a production transaction behaviour in tests.
             atomic_context = transaction(using=using)
         else:
-            atomic_context = django_transaction.atomic(using=using, savepoint=False)
+            # If we're already in a transaction, do nothing.
+            atomic_context = contextlib.nullcontext()
 
         with atomic_context:
             yield
