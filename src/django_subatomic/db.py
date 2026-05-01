@@ -115,15 +115,16 @@ def transaction_if_not_already[**P, R](
 
     @contextlib.contextmanager
     def _transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
-        savepoint = _innermost_atomic_block_wraps_testcase(using=using)
-
-        with (
-            _execute_on_commit_callbacks_in_tests(using),
-            # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
+        atomic_context: contextlib.AbstractContextManager[None]
+        if not in_transaction(using=using):
+            # If the innermost atomic block is from a test case, `transaction` will create a SAVEPOINT.
             # This allows for a rollback when an exception propagates out of this block, and so
             # better simulates a production transaction behaviour in tests.
-            django_transaction.atomic(using=using, savepoint=savepoint),
-        ):
+            atomic_context = transaction(using=using)
+        else:
+            atomic_context = django_transaction.atomic(using=using, savepoint=False)
+
+        with atomic_context:
             yield
 
     decorator = _transaction_if_not_already(using=using)
