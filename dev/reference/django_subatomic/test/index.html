@@ -828,7 +828,7 @@ use <a class="autorefs autorefs-internal" title="transaction" href="../db/#djang
 <span class="sd">    Note that this does not handle after-commit callback simulation. If you need that,</span>
 <span class="sd">    use [`transaction`][django_subatomic.db.transaction] instead.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">,</span> <span class="n">durable</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">yield</span>
 </code></pre></div></td></tr></table></div>
             </details>
