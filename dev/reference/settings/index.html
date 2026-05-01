@@ -804,11 +804,14 @@ on a per-test basis.</p>
 <h2 id="subatomic_catch_unhandled_after_commit_callbacks_in_tests"><code>SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS</code><a class="headerlink" href="#subatomic_catch_unhandled_after_commit_callbacks_in_tests" title="Permanent link">&para;</a></h2>
 <p>(default: <code>True</code>)</p>
 <p><a class="autorefs autorefs-internal" title="transaction" href="../django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a>
-will raise <code>_UnhandledCallbacks</code> in tests
-if it detects any lingering unhandled after-commit callbacks
-when it's called.
-Note: because this exception represents a programming error,
-it starts with an underscore to discourage anyone from catching it.</p>
+and <a class="autorefs autorefs-internal" title="transaction_if_not_already" href="../django_subatomic/db/#django_subatomic.db.transaction_if_not_already"><code>transaction_if_not_already</code></a>
+will raise <code>subatomic.db._UnhandledCallbacks</code> in tests
+if they detect any lingering unhandled after-commit callbacks
+when they are called.
+<a class="autorefs autorefs-internal" title="part_of_a_transaction" href="../django_subatomic/test/#django_subatomic.test.part_of_a_transaction"><code>part_of_a_transaction</code></a>
+will raise <code>subatomic.test._UnhandledCallbacks</code> instead.
+Note: because these exceptions each represent a programming error,
+they start with an underscore to discourage anyone from catching them.</p>
 <p>This highlights order-of-execution issues in tests
 caused by after-commit callbacks having not been run.
 This can only happen in tests without after-commit callback simulation
