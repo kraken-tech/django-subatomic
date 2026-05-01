@@ -43,10 +43,6 @@ class TestPartOfATransaction:
         """
         Callbacks aren't executed when tests manage the transaction.
         """
-
-        def _callback_which_should_not_be_called() -> None:
-            pytest.fail("Callback should not have been called.")  # pragma: no cover
-
         with test.part_of_a_transaction():
             db.run_after_commit(_callback_which_should_not_be_called)
 
@@ -74,3 +70,7 @@ class TestPartOfATransaction:
             ):
                 with test.part_of_a_transaction():
                     ...
+
+
+def _callback_which_should_not_be_called() -> None:
+    pytest.fail("Callback should not have been called.")  # pragma: no cover
