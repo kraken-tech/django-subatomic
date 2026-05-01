@@ -10,6 +10,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added MariaDB and SQLite to the test matrix.
 - Disallowed nesting of `part_of_a_transaction` to prevent nonsense
   implication of nested partial transactions in tests. Fixes #150.
+- `part_of_a_transaction` now clears after-commit callbacks from the transaction before it exits.
+  This avoids polluting the test's transaction with callbacks.
 
 ## [1.0.0] - 2026-04-16
 

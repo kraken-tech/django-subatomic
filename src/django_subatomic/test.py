@@ -32,5 +32,13 @@ def part_of_a_transaction(using: str | None = None) -> Generator[None]:
     Note that this does not handle after-commit callback simulation. If you need that,
     use [`transaction`][django_subatomic.db.transaction] instead.
     """
+    connection = transaction.get_connection(using)
+
     with transaction.atomic(using=using, durable=True):
         yield
+
+    # Throw away any callbacks that were registered during the partial transaction,
+    # so that they don't pollute later code.
+    # We don't need to do this in `try: ... finally:` because Django's roll
+    # back logic already clears the callbacks when an exception is raised.
+    connection.run_on_commit = []

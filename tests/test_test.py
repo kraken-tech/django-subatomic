@@ -46,6 +46,33 @@ class TestPartOfATransaction:
         with test.part_of_a_transaction():
             db.run_after_commit(_callback_which_should_not_be_called)
 
+    def test_remaining_callbacks_cleared_on_exit(self) -> None:
+        """
+        Any callbacks left at the end of the block are cleared out.
+        """
+        with test.part_of_a_transaction():
+            db.run_after_commit(_callback_which_should_not_be_called)
+
+        # If the callbacks weren't cleared, this would raise an error.
+        with db.transaction():
+            ...
+
+    def test_remaining_callbacks_cleared_on_error(self) -> None:
+        """
+        Callbacks left at the end of the block are cleared out when an error is raised.
+        """
+
+        class _ArbitraryError(Exception): ...
+
+        with pytest.raises(_ArbitraryError):
+            with test.part_of_a_transaction():
+                db.run_after_commit(_callback_which_should_not_be_called)
+                raise _ArbitraryError
+
+        # If the callbacks weren't cleared, this would raise an error.
+        with db.transaction():
+            ...
+
     @pytest.mark.parametrize(
         "transaction_manager",
         (
