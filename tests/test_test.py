@@ -1,0 +1,76 @@
+from __future__ import annotations
+
+import re
+from typing import TYPE_CHECKING
+
+import pytest
+from django.db import transaction as django_transaction
+
+from django_subatomic import db, test
+
+
+if TYPE_CHECKING:
+    import contextlib
+    from typing import Protocol
+
+    class DBContextManager(Protocol):
+        def __call__(
+            self, *, using: str | None = None
+        ) -> contextlib.AbstractContextManager[None, None]: ...
+
+
+DEFAULT = "default"
+pytestmark = [pytest.mark.django_db(databases=[DEFAULT])]
+
+
+class TestPartOfATransaction:
+    """
+    Tests of `part_of_a_transaction`.
+    """
+
+    def test_simulates_transaction(self) -> None:
+        """
+        A transaction appears to be open inside `part_of_a_transaction`.
+        """
+        assert db.in_transaction() is False
+
+        with test.part_of_a_transaction():
+            assert db.in_transaction() is True
+
+        assert db.in_transaction() is False
+
+    def test_callbacks_not_executed_in_normal_test_case(self) -> None:
+        """
+        Callbacks aren't executed when tests manage the transaction.
+        """
+
+        def _callback_which_should_not_be_called() -> None:
+            pytest.fail("Callback should not have been called.")  # pragma: no cover
+
+        with test.part_of_a_transaction():
+            db.run_after_commit(_callback_which_should_not_be_called)
+
+    @pytest.mark.parametrize(
+        "transaction_manager",
+        (
+            db.transaction,
+            db.transaction_if_not_already,
+            django_transaction.atomic,
+            test.part_of_a_transaction,
+        ),
+    )
+    def test_fails_when_nested_inside_an_atomic_block(
+        self, transaction_manager: DBContextManager
+    ) -> None:
+        """
+        `part_of_a_transaction` cannot be nested inside another atomic block.
+        """
+        with transaction_manager():
+            with pytest.raises(
+                RuntimeError,
+                match=re.escape(
+                    "A durable atomic block cannot be nested within another atomic block."
+                ),
+            ):
+                with test.part_of_a_transaction():
+                    ...
