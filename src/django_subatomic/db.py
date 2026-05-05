@@ -110,17 +110,14 @@ def transaction_if_not_already[**P, R](
 
     @contextlib.contextmanager
     def _transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
-        atomic_context: contextlib.AbstractContextManager[None]
-        if not in_transaction(using=using):
-            # If the innermost atomic block is from a test case, `transaction` will create a SAVEPOINT.
-            # This allows for a rollback when an exception propagates out of this block, and so
-            # better simulates a production transaction behaviour in tests.
-            atomic_context = transaction(using=using)
-        else:
-            # If we're already in a transaction, do nothing.
-            atomic_context = contextlib.nullcontext()
+        if in_transaction(using=using):
+            yield  # If we're already in a transaction, do nothing.
+            return
 
-        with atomic_context:
+        # If the innermost atomic block is from a test case, `transaction` will create a SAVEPOINT.
+        # This allows for a rollback when an exception propagates out of this block, and so
+        # better simulates a production transaction behaviour in tests.
+        with transaction(using=using):
             yield
 
     decorator = _transaction_if_not_already(using=using)
