@@ -824,7 +824,9 @@ use <a class="autorefs autorefs-internal" title="transaction" href="../db/#djang
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
-<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">part_of_a_transaction</span><span class="p">(</span><span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allow calling &quot;transaction required&quot; code without an explicit transaction.</span>
@@ -843,9 +845,11 @@ use <a class="autorefs autorefs-internal" title="transaction" href="../db/#djang
 <span class="sd">    use [`transaction`][django_subatomic.db.transaction] instead.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">connection</span> <span class="o">=</span> <span class="n">transaction</span><span class="o">.</span><span class="n">get_connection</span><span class="p">(</span><span class="n">using</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span>
+    <span class="n">raise_unhandled_callbacks</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
         <span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS&quot;</span><span class="p">,</span> <span class="kc">True</span>
-    <span class="p">):</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">raise_unhandled_callbacks</span><span class="p">:</span>
         <span class="n">callbacks</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">run_on_commit</span>
         <span class="k">if</span> <span class="n">callbacks</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">_UnhandledCallbacks</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">callback</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">callbacks</span><span class="p">))</span>
