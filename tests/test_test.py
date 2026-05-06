@@ -131,6 +131,17 @@ class TestPartOfATransaction:
                 with test.part_of_a_transaction():
                     ...
 
+    @pytest.mark.django_db(transaction=True)
+    def test_fails_when_test_suite_not_managing_transactions(self) -> None:
+        """
+        `part_of_a_transaction` cannot be used if the test suite isn't managing transactions.
+        """
+        with (
+            pytest.raises(test._OnlyForUseInDjangoTestTransaction),  # noqa: SLF001
+            test.part_of_a_transaction(),
+        ):
+            ...
+
 
 def _callback_which_should_not_be_called() -> None:
     pytest.fail("Callback should not have been called.")  # pragma: no cover

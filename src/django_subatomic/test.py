@@ -30,6 +30,17 @@ class _UnhandledCallbacks(Exception):
     callbacks: tuple[Callable[[], object], ...]
 
 
+class _OnlyForUseInDjangoTestTransaction(Exception):
+    """
+    Raised when `part_of_a_transaction` is used without a transaction created by Django tests.
+
+    This can also be raised in tests which handle their own transaction
+    instead of allowing the testsuite to wrap the test in a transaction.
+    (These kinds of tests are called "transaction testcases".)
+    This prevents `part_of_a_transaction` from running after-commit callbacks.
+    """
+
+
 @contextlib.contextmanager
 def part_of_a_transaction(using: str | None = None) -> Generator[None]:
     """
@@ -41,17 +52,24 @@ def part_of_a_transaction(using: str | None = None) -> Generator[None]:
     This works by entering a new "atomic" block, so that the inner-most "atomic"
     isn't the one created by the test-suite.
 
-    In "transaction testcases" this will create a transaction, but if you're writing
-    a transaction testcase, you probably want to manage transactions more explicitly
-    than by calling this.
-
     Note that this does not handle after-commit callback simulation. If you need that,
     use [`transaction`][django_subatomic.db.transaction] instead.
+
+    In production code and "transaction testcases" this will raise an error
+    to ensure we don't misleadingly run after-commit callbacks.
     """
     connection = transaction.get_connection(using)
+
     raise_unhandled_callbacks = getattr(
         settings, "SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS", True
     )
+
+    # We must be called from inside an atomic block created by the test suite
+    # to avoid running after-commit callbacks on exit.
+    # We don't check that the atomic block is from the test suite though,
+    # because if it's created elsewhere we'll see an error from `durable=True` below.
+    if len(connection.atomic_blocks) == 0:
+        raise _OnlyForUseInDjangoTestTransaction
 
     if raise_unhandled_callbacks:
         callbacks = connection.run_on_commit
