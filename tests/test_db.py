@@ -226,7 +226,11 @@ class TestOnCommitCallbacksInTests:
         counter = Counter()
 
         # Django's `atomic` leaves unhandled after-commit actions on exit.
-        with django_transaction.atomic():
+        with (
+            django_transaction.atomic(),
+            # This setting prevents `run_after_commit` from raising an error when registering the callback.
+            override_settings(SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS=False),
+        ):
             db.run_after_commit(counter.increment)
 
         # `transaction` will raise when it finds the unhandled callback.
@@ -250,7 +254,11 @@ class TestOnCommitCallbacksInTests:
         counter = Counter()
 
         # Django's `atomic` leaves unhandled after-commit actions on exit.
-        with django_transaction.atomic():
+        with (
+            django_transaction.atomic(),
+            # This setting prevents `run_after_commit` from raising an error when registering the callback.
+            override_settings(SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS=False),
+        ):
             db.run_after_commit(counter.increment)
 
         # Run after-commit callbacks when `transaction` exits,
@@ -585,6 +593,53 @@ class TestRunAfterCommit:
             db.run_after_commit(counter.increment, using=DEFAULT)
 
         assert exc.value.database == DEFAULT
+        assert counter.count == 0
+
+    def test_ambiguous_after_commit_callback(self) -> None:
+        """
+        `run_after_commit` errors if we're not sure if tests should emulate transactions.
+
+        See Note [After-commit callbacks require a transaction]
+        """
+        counter = Counter()
+
+        with (
+            django_transaction.atomic(),
+            pytest.raises(db._AmbiguousAfterCommitTestBehaviour),  # noqa: SLF001
+        ):
+            db.run_after_commit(counter.increment)
+
+        assert counter.count == 0
+
+    @pytest.mark.django_db(transaction=True)
+    def test_unambiguous_unsimulated_callbacks(self) -> None:
+        """
+        `run_after_commit` doesn't error if in `atomic` in a transaction testcase.
+
+        This is because Django will handle the after-commit callbacks itself.
+        """
+        counter = Counter()
+
+        with django_transaction.atomic():
+            db.run_after_commit(counter.increment)
+
+        assert counter.count == 1
+
+    def test_ambiguous_simulation_requirement_disabled(self) -> None:
+        """
+        Callbacks aren't simulated in tests when ambiguous simulation requirement errors are disabled.
+
+        See Note [After-commit callbacks require a transaction]
+        """
+        counter = Counter()
+
+        with (
+            django_transaction.atomic(),
+            override_settings(SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS=False),
+        ):
+            db.run_after_commit(counter.increment)
+
+        # The callback was not run.
         assert counter.count == 0
 
     @_parametrize_transaction_testcase

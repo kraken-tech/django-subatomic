@@ -15,6 +15,33 @@ transition to this strict behaviour
 by getting it working in tests
 before enabling it in production.
 
+## `SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS`
+
+(default: `True`)
+
+When this setting is `True`,
+[`run_after_commit`][django_subatomic.db.run_after_commit] will ensure that it knows whether or not after-commit callbacks should be simulated in tests.
+To avoid silently doing the wrong thing when it is not sure,
+[`run_after_commit`][django_subatomic.db.run_after_commit] will raise `subatomic.db._AmbiguousAfterCommitTestBehaviour`.
+(This setting starts with an underscore because it is not intended to be caught and handled.)
+
+This can happen in tests when [`run_after_commit`][django_subatomic.db.run_after_commit] is called
+inside a Django `atomic` block,
+and that `atomic` is directly nested inside the test suite's transaction.
+Because the test suite would roll back the transaction,
+after-commit callbacks would not normally be run.
+
+Where after-commit callbacks should be run,
+this can be fixed by replacing (or wrapping) the `atomic` block with
+[`subatomic.db.transaction`][django_subatomic.db.transaction]
+(or [`transaction_if_not_already`][django_subatomic.db.transaction_if_not_already] if necessary).
+
+In tests where after-commit callbacks should not be run,
+[`part_of_a_transaction`][django_subatomic.test.part_of_a_transaction] should be used instead.
+
+If this setting is `False`,
+the after-commit callbacks that this check would catch will not be run.
+
 ## `SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS`
 
 (default: `True`)

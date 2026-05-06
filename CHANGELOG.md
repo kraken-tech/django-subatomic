@@ -18,6 +18,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `part_of_a_transaction` now raises an error if unhandled callbacks are detected when it starts.
   This makes it more similar to `transaction`.
   The error can be silenced by setting the `SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS` setting to `False`
+- `run_after_commit` now raises an error in tests if it doesn't know if callbacks should be run.
+  This prevents tests from silently doing the wrong thing (i.e. not running the callbacks).
+  To fix this error, use `transaction` instead of `atomic`
+  (or to explicitly disable callbacks when testing low-level code use `part_of_a_transaction`).
+  The error can be silenced by setting `SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS` setting to `False`.
 
 ### Fixed
 - Disallowed nesting of `part_of_a_transaction` to prevent nonsense
