@@ -435,23 +435,6 @@ class TestTransactionIfNotAlready:
 
         assert django_transaction.get_autocommit() is True
 
-    def test_cannot_query_after_exception_in_test_case(self) -> None:
-        """
-        Check that we do not have a working database connection and may not do queries after
-        catching an exception and before rolling back.
-
-        The outer atomic block will be unusable because we have not rolled back after the
-        exception.
-        """
-        with db.transaction():
-            with pytest.raises(_AnError):
-                with db.transaction_if_not_already():
-                    raise _AnError
-
-            with pytest.raises(django_transaction.TransactionManagementError):
-                with django_db.connections["default"].cursor() as cursor:
-                    cursor.execute("SELECT 1")
-
     def test_can_query_after_exception_in_test_case(self) -> None:
         """
         Check that we have a working database connection and may do queries after catching an exception.

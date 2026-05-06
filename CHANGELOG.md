@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Exceptions raised through `transaction_if_not_already`
+  when it was called from inside an existing transaction
+  will no longer invalidate the outer transaction's context.
+
 ### Added
 - Added MariaDB and SQLite to the test matrix.
 - `part_of_a_transaction` now raises an error if unhandled callbacks are detected when it starts.

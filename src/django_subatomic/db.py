@@ -57,10 +57,10 @@ def transaction[**P, R](
 
     @contextlib.contextmanager
     def _transaction(*, using: str | None) -> Generator[None]:
-        # Note that `savepoint=False` is not required here because
-        # the `savepoint` flag is ignored when `durable` is `True`.
         with (
             _execute_on_commit_callbacks_in_tests(using),
+            # Note that `savepoint=False` is not required on `atomic` because
+            # the `savepoint` flag is ignored when `durable` is `True`.
             django_transaction.atomic(using=using, durable=True),
         ):
             yield
@@ -99,11 +99,6 @@ def transaction_if_not_already[**P, R](
         which use it may need further work to achieve full control over how
         transactions are managed.
 
-    Warning:
-        If this function is called when a transaction is already open, errors raised
-        through it will invalidate the current transaction, regardless of where
-        it was opened.
-
     Tip: Suggested alternatives
         - In functions which should not control transactions,
           use [`transaction_required`][django_subatomic.db.transaction_required].
@@ -115,15 +110,14 @@ def transaction_if_not_already[**P, R](
 
     @contextlib.contextmanager
     def _transaction_if_not_already(*, using: str | None = None) -> Generator[None]:
-        # If the innermost atomic block is from a test case, we should create a SAVEPOINT here.
+        if in_transaction(using=using):
+            yield  # If we're already in a transaction, do nothing.
+            return
+
+        # If the innermost atomic block is from a test case, `transaction` will create a SAVEPOINT.
         # This allows for a rollback when an exception propagates out of this block, and so
         # better simulates a production transaction behaviour in tests.
-        savepoint = _innermost_atomic_block_wraps_testcase(using=using)
-
-        with (
-            _execute_on_commit_callbacks_in_tests(using),
-            django_transaction.atomic(using=using, savepoint=savepoint),
-        ):
+        with transaction(using=using):
             yield
 
     decorator = _transaction_if_not_already(using=using)
