@@ -450,12 +450,11 @@ def _ensure_transaction_is_open(*, using: str) -> None:
     needs_transaction = getattr(
         settings, "SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION", True
     )
+    # Skip checks if they have been disabled.
     if not needs_transaction:
         return
 
-    # Fail if a transaction is required, but none exists.
-    # Ignore test-suite transactions when checking for a transaction.
-    # See Note [After-commit callbacks require a transaction]
+    # Fail if we're not in a transaction.
     if not in_transaction(using=using):
         raise _MissingRequiredTransaction(database=using)
 
