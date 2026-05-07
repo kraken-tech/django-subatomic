@@ -533,6 +533,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#subatomic_after_commit_ambiguity_error_in_tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#subatomic_run_after_commit_callbacks_in_tests" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -738,6 +749,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#subatomic_after_commit_ambiguity_error_in_tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#subatomic_run_after_commit_callbacks_in_tests" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -790,6 +812,26 @@ to help with the process of adopting it in existing projects.</p>
 transition to this strict behaviour
 by getting it working in tests
 before enabling it in production.</p>
+<h2 id="subatomic_after_commit_ambiguity_error_in_tests"><code>SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS</code><a class="headerlink" href="#subatomic_after_commit_ambiguity_error_in_tests" title="Permanent link">&para;</a></h2>
+<p>(default: <code>True</code>)</p>
+<p>When this setting is <code>True</code>,
+<a class="autorefs autorefs-internal" title="run_after_commit" href="../django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> will ensure that it knows whether or not after-commit callbacks should be simulated in tests.
+To avoid silently doing the wrong thing when it is not sure,
+<a class="autorefs autorefs-internal" title="run_after_commit" href="../django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> will raise <code>subatomic.db._AmbiguousAfterCommitTestBehaviour</code>.
+(This setting starts with an underscore because it is not intended to be caught and handled.)</p>
+<p>This can happen in tests when <a class="autorefs autorefs-internal" title="run_after_commit" href="../django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> is called
+inside a Django <code>atomic</code> block,
+and that <code>atomic</code> is directly nested inside the test suite's transaction.
+Because the test suite would roll back the transaction,
+after-commit callbacks would not normally be run.</p>
+<p>Where after-commit callbacks should be run,
+this can be fixed by replacing (or wrapping) the <code>atomic</code> block with
+<a class="autorefs autorefs-internal" title="transaction" href="../django_subatomic/db/#django_subatomic.db.transaction"><code>subatomic.db.transaction</code></a>
+(or <a class="autorefs autorefs-internal" title="transaction_if_not_already" href="../django_subatomic/db/#django_subatomic.db.transaction_if_not_already"><code>transaction_if_not_already</code></a> if necessary).</p>
+<p>In tests where after-commit callbacks should not be run,
+<a class="autorefs autorefs-internal" title="part_of_a_transaction" href="../django_subatomic/test/#django_subatomic.test.part_of_a_transaction"><code>part_of_a_transaction</code></a> should be used instead.</p>
+<p>If this setting is <code>False</code>,
+the after-commit callbacks that this check would catch will not be run.</p>
 <h2 id="subatomic_run_after_commit_callbacks_in_tests"><code>SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS</code><a class="headerlink" href="#subatomic_run_after_commit_callbacks_in_tests" title="Permanent link">&para;</a></h2>
 <p>(default: <code>True</code>)</p>
 <p>When this setting is <code>True</code>,

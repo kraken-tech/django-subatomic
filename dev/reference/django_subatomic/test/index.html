@@ -826,7 +826,9 @@ use <a class="autorefs autorefs-internal" title="transaction" href="../db/#djang
 <span class="normal">65</span>
 <span class="normal">66</span>
 <span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">part_of_a_transaction</span><span class="p">(</span><span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allow calling &quot;transaction required&quot; code without an explicit transaction.</span>
@@ -855,6 +857,8 @@ use <a class="autorefs autorefs-internal" title="transaction" href="../db/#djang
             <span class="k">raise</span> <span class="n">_UnhandledCallbacks</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">callback</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">callbacks</span><span class="p">))</span>
 
     <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">,</span> <span class="n">durable</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">atomic_block</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">atomic_blocks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">atomic_block</span><span class="o">.</span><span class="n">_from_subatomic</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># noqa: SLF001</span>
         <span class="k">yield</span>
 
     <span class="c1"># Throw away any callbacks that were registered during the partial transaction,</span>
