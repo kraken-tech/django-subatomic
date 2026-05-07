@@ -59,6 +59,8 @@ def part_of_a_transaction(using: str | None = None) -> Generator[None]:
             raise _UnhandledCallbacks(tuple(callback for _, callback, _ in callbacks))
 
     with transaction.atomic(using=using, durable=True):
+        atomic_block = connection.atomic_blocks[-1]
+        atomic_block._from_subatomic = True  # noqa: SLF001
         yield
 
     # Throw away any callbacks that were registered during the partial transaction,

@@ -63,6 +63,9 @@ def transaction[**P, R](
             # the `savepoint` flag is ignored when `durable` is `True`.
             django_transaction.atomic(using=using, durable=True),
         ):
+            connection = django_transaction.get_connection(using=using)
+            atomic_block = connection.atomic_blocks[-1]
+            atomic_block._from_subatomic = True  # noqa: SLF001
             yield
 
     decorator = _transaction(using=using)
@@ -326,6 +329,37 @@ class _MissingRequiredTransaction(Exception):
 
 
 @attrs.frozen
+class _AmbiguousAfterCommitTestBehaviour(Exception):
+    """
+    Raised in tests when it's unclear if after-commit callbacks should be run.
+
+    You are calling `run_after_commit` inside an `atomic` block in a test.
+    This `atomic` is inside the test suite's transaction,
+    so after-commit callbacks will not be run
+    (because the test suite will roll back the transaction).
+
+    Subatomic doesn't know if you intended for these callbacks to be run or not,
+    so raises this error to avoid silently doing the wrong thing.
+
+    In production code, or tests where after-commit callbacks should be run,
+    replace (or wrap) the `atomic` block with `subatomic.db.transaction`.
+
+    In tests where after-commit callbacks should not be run,
+    use `subatomic.test.part_of_a_transaction` instead.
+
+    To help your project progressively adopt this check,
+    you can disable this requirement for after-commit callbacks by setting
+    `settings.SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS` to `False`.
+
+    See Note [_MissingRequiredTransaction in tests]
+
+    This exception should not be caught, as it indicates a programming error.
+    """
+
+    database: str
+
+
+@attrs.frozen
 class _UnexpectedOpenTransaction(Exception):
     """
     Raised when calling a `durable` function with an open transaction.
@@ -424,18 +458,9 @@ def run_after_commit(
     if using is None:
         using = django_db.DEFAULT_DB_ALIAS
 
-    # See Note [After-commit callbacks require a transaction]
-    needs_transaction = getattr(
-        settings, "SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION", True
-    )
+    _ensure_transaction_is_open(using=using)
+
     only_in_testcase_transaction = _innermost_atomic_block_wraps_testcase(using=using)
-
-    # Fail if a transaction is required, but none exists.
-    # Ignore test-suite transactions when checking for a transaction.
-    # See Note [After-commit callbacks require a transaction]
-    if needs_transaction and not in_transaction(using=using):
-        raise _MissingRequiredTransaction(database=using)
-
     if (
         # See Note [Running after-commit callbacks in tests]
         getattr(settings, "SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS", True)
@@ -444,6 +469,54 @@ def run_after_commit(
         callback()
     else:
         django_transaction.on_commit(callback, using=using)
+
+
+def _ensure_transaction_is_open(*, using: str) -> None:
+    """
+    Raise an error if transactions are required but missing.
+
+    If there is no transaction open, `_MissingRequiredTransaction` is raised.
+    This can be silenced with the Django setting
+    `SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION`.
+
+    See Note [After-commit callbacks require a transaction]
+
+    When transactions are managed by the test suite,
+    this also ensures after-commit emulation is accounted for by Subatomic.
+    When they are not, `_AmbiguousAfterCommitTestBehaviour` is raised.
+    This can be silenced with the Django setting
+    `SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS`.
+    """
+    needs_transaction = getattr(
+        settings, "SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION", True
+    )
+    # Skip checks if they have been disabled.
+    if not needs_transaction:
+        return
+
+    # Fail if we're not in a transaction.
+    if not in_transaction(using=using):
+        raise _MissingRequiredTransaction(database=using)
+
+    ambiguity_error_in_tests = getattr(
+        settings, "SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS", True
+    )
+    if not ambiguity_error_in_tests:
+        return
+
+    connection = django_transaction.get_connection(using=using)
+
+    # We expect after-commit callbacks to be handled by Django
+    # if we're not in a test-managed transaction.
+    if not connection.atomic_blocks[0]._from_testcase:  # noqa: SLF001
+        return
+
+    # `_from_testcase` told us that we're in a test-managed transaction.
+    # `in_transaction` told us that we're in a further atomic context.
+    # If Subatomic didn't open that context then we don't know if the
+    # test expects after-commit callbacks to be emulated or not.
+    if not hasattr(connection.atomic_blocks[1], "_from_subatomic"):
+        raise _AmbiguousAfterCommitTestBehaviour(database=using)
 
 
 def _innermost_atomic_block_wraps_testcase(*, using: str | None = None) -> bool:
