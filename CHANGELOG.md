@@ -15,6 +15,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - Added MariaDB and SQLite to the test matrix.
+- `part_of_a_transaction` now raises an error if it is called outside of tests.
+  This prevents code which misleadingly runs after-commit callbacks.
+  For the same reason, it will also fail when called within transaction test cases.
 - `part_of_a_transaction` now raises an error if unhandled callbacks are detected when it starts.
   This makes it more similar to `transaction`.
   The error can be silenced by setting the `SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS` setting to `False`
