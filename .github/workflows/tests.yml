@@ -86,11 +86,16 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-          ref: ${{ github.head_ref }}
+          repository: ${{ github.repository }}
           fetch-depth: 0
-    - run: |
-        git fetch origin main
-        git branch main origin/main
+    - name: Check out fork
+      run: |
+        git remote add fork "$FORK_REPO"
+        git fetch fork "$HEAD_REF"
+        git checkout "$HEAD_REF"
+      env:
+        FORK_REPO: https://github.com/${{ github.event.pull_request.head.repo.full_name }}
+        HEAD_REF: ${{ github.head_ref }}
     - uses: actions/setup-python@v6
       with:
         python-version-file: '.github/workflows/.python-version'
