@@ -4,7 +4,6 @@ import contextlib
 import functools
 from typing import TYPE_CHECKING, overload
 
-import attrs
 from django import db as django_db
 from django.conf import settings
 from django.db import transaction as django_transaction
@@ -302,7 +301,6 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Generator
 # we need to permit the test-suite's transaction.
 
 
-@attrs.frozen
 class _MissingRequiredTransaction(Exception):
     """
     Raised by `transaction_required` when we're not in a transaction.
@@ -325,10 +323,11 @@ class _MissingRequiredTransaction(Exception):
     This exception should not be caught, as it indicates a programming error.
     """
 
-    database: str
+    def __init__(self, database: str) -> None:
+        super().__init__()
+        self.database = database
 
 
-@attrs.frozen
 class _AmbiguousAfterCommitTestBehaviour(Exception):
     """
     Raised in tests when it's unclear if after-commit callbacks should be run.
@@ -356,10 +355,11 @@ class _AmbiguousAfterCommitTestBehaviour(Exception):
     This exception should not be caught, as it indicates a programming error.
     """
 
-    database: str
+    def __init__(self, database: str) -> None:
+        super().__init__()
+        self.database = database
 
 
-@attrs.frozen
 class _UnexpectedOpenTransaction(Exception):
     """
     Raised when calling a `durable` function with an open transaction.
@@ -374,10 +374,11 @@ class _UnexpectedOpenTransaction(Exception):
     This exception should not be caught, as it indicates a programming error.
     """
 
-    open_dbs: frozenset[str]
+    def __init__(self, open_dbs: frozenset[str]) -> None:
+        super().__init__()
+        self.open_dbs = open_dbs
 
 
-@attrs.frozen
 class _UnexpectedDanglingTransaction(Exception):
     """
     Raised when a `durable` function exits with a transaction open.
@@ -388,10 +389,11 @@ class _UnexpectedDanglingTransaction(Exception):
     This exception should not be caught, as it indicates a programming error.
     """
 
-    open_dbs: frozenset[str]
+    def __init__(self, open_dbs: frozenset[str]) -> None:
+        super().__init__()
+        self.open_dbs = open_dbs
 
 
-@attrs.frozen
 class _UnhandledCallbacks(Exception):
     """
     Raised in tests when unhandled callbacks are found before opening a transaction.
@@ -402,7 +404,9 @@ class _UnhandledCallbacks(Exception):
     The best solution is to ensure the after-commit callbacks are run.
     """
 
-    callbacks: tuple[Callable[[], object], ...]
+    def __init__(self, callbacks: tuple[Callable[[], object], ...]) -> None:
+        super().__init__()
+        self.callbacks = callbacks
 
 
 # Note [After-commit callbacks require a transaction]
