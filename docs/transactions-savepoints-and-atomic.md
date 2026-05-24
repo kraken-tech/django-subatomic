@@ -95,7 +95,7 @@ to make it raise an exception when someone tries to run it without first opening
     The trade-off is that lower-level tests will see this error too.
     If you're testing [`transaction_required`][django_subatomic.db.transaction_required] code directly,
     and you're _sure_ that the code shouldn't be responsible for opening a transaction,
-    use the [`part_of_a_transaction`][django_subatomic.test.part_of_a_transaction] decorator/context-manager
+    use the [`part_of_a_transaction`][django_subatomic.test.part_of_a_transaction] context manager
     to get things working.
     This will not run after-commit hooks.
     If you'd like those to run, create a [transaction](#transactions) instead.
