@@ -85,7 +85,7 @@ from django.test import TestCase
 
 class TestBuildABCD(TestCase):
     def test_build_ABCD(self):
-        with self.captureOnCommitCallbacks(execute=True)
+        with self.captureOnCommitCallbacks(execute=True):
             built = build_ABCD() # This returns `["A", "B", "D", "C"]`
         assert built == ["A", "B", "C", "D"]  # This will fail!
 ```
@@ -99,7 +99,7 @@ While the callbacks do run, the execution order differs from production, potenti
 ```python
 from django.test import TransactionTestCase
 
-class TestBuildABCD(TransactionTestCase)
+class TestBuildABCD(TransactionTestCase):
     def test_build_ABCD():
         built = build_ABCD() # This returns `["A", "B", "C", "D"]`
         assert built == ["A", "B", "C", "D"]

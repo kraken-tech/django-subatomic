@@ -22,7 +22,7 @@ before enabling it in production.
 When this setting is `True`,
 [`run_after_commit`][django_subatomic.db.run_after_commit] will ensure that it knows whether or not after-commit callbacks should be simulated in tests.
 To avoid silently doing the wrong thing when it is not sure,
-[`run_after_commit`][django_subatomic.db.run_after_commit] will raise `subatomic.db._AmbiguousAfterCommitTestBehaviour`.
+[`run_after_commit`][django_subatomic.db.run_after_commit] will raise `django_subatomic.db._AmbiguousAfterCommitTestBehaviour`.
 (This setting starts with an underscore because it is not intended to be caught and handled.)
 
 This can happen in tests when [`run_after_commit`][django_subatomic.db.run_after_commit] is called
@@ -33,7 +33,7 @@ after-commit callbacks would not normally be run.
 
 Where after-commit callbacks should be run,
 this can be fixed by replacing (or wrapping) the `atomic` block with
-[`subatomic.db.transaction`][django_subatomic.db.transaction]
+[`django_subatomic.db.transaction`][django_subatomic.db.transaction]
 (or [`transaction_if_not_already`][django_subatomic.db.transaction_if_not_already] if necessary).
 
 In tests where after-commit callbacks should not be run,
@@ -63,11 +63,11 @@ on a per-test basis.
 
 [`transaction`][django_subatomic.db.transaction]
 and [`transaction_if_not_already`][django_subatomic.db.transaction_if_not_already]
-will raise `subatomic.db._UnhandledCallbacks` in tests
+will raise `django_subatomic.db._UnhandledCallbacks` in tests
 if they detect any lingering unhandled after-commit callbacks
 when they are called.
 [`part_of_a_transaction`][django_subatomic.test.part_of_a_transaction]
-will raise `subatomic.test._UnhandledCallbacks` instead.
+will raise `django_subatomic.test._UnhandledCallbacks` instead.
 Note: because these exceptions each represent a programming error,
 they start with an underscore to discourage anyone from catching them.
 
