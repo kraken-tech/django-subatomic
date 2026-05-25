@@ -973,7 +973,7 @@ but with some caveats.</p>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TestBuildABCD</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_build_ABCD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">captureOnCommitCallbacks</span><span class="p">(</span><span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">captureOnCommitCallbacks</span><span class="p">(</span><span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">built</span> <span class="o">=</span> <span class="n">build_ABCD</span><span class="p">()</span> <span class="c1"># This returns `[&quot;A&quot;, &quot;B&quot;, &quot;D&quot;, &quot;C&quot;]`</span>
         <span class="k">assert</span> <span class="n">built</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">]</span>  <span class="c1"># This will fail!</span>
 </code></pre></div>
@@ -983,7 +983,7 @@ While the callbacks do run, the execution order differs from production, potenti
 <h3 id="using-transaction-test-cases-potentially-very-slow">⚠️ Using transaction test cases (potentially very slow)<a class="headerlink" href="#using-transaction-test-cases-potentially-very-slow" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">django.test</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransactionTestCase</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">TestBuildABCD</span><span class="p">(</span><span class="n">TransactionTestCase</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestBuildABCD</span><span class="p">(</span><span class="n">TransactionTestCase</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_build_ABCD</span><span class="p">():</span>
         <span class="n">built</span> <span class="o">=</span> <span class="n">build_ABCD</span><span class="p">()</span> <span class="c1"># This returns `[&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;]`</span>
         <span class="k">assert</span> <span class="n">built</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">]</span>

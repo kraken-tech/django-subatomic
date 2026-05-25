@@ -817,7 +817,7 @@ before enabling it in production.</p>
 <p>When this setting is <code>True</code>,
 <a class="autorefs autorefs-internal" title="run_after_commit" href="../django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> will ensure that it knows whether or not after-commit callbacks should be simulated in tests.
 To avoid silently doing the wrong thing when it is not sure,
-<a class="autorefs autorefs-internal" title="run_after_commit" href="../django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> will raise <code>subatomic.db._AmbiguousAfterCommitTestBehaviour</code>.
+<a class="autorefs autorefs-internal" title="run_after_commit" href="../django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> will raise <code>django_subatomic.db._AmbiguousAfterCommitTestBehaviour</code>.
 (This setting starts with an underscore because it is not intended to be caught and handled.)</p>
 <p>This can happen in tests when <a class="autorefs autorefs-internal" title="run_after_commit" href="../django_subatomic/db/#django_subatomic.db.run_after_commit"><code>run_after_commit</code></a> is called
 inside a Django <code>atomic</code> block,
@@ -826,7 +826,7 @@ Because the test suite would roll back the transaction,
 after-commit callbacks would not normally be run.</p>
 <p>Where after-commit callbacks should be run,
 this can be fixed by replacing (or wrapping) the <code>atomic</code> block with
-<a class="autorefs autorefs-internal" title="transaction" href="../django_subatomic/db/#django_subatomic.db.transaction"><code>subatomic.db.transaction</code></a>
+<a class="autorefs autorefs-internal" title="transaction" href="../django_subatomic/db/#django_subatomic.db.transaction"><code>django_subatomic.db.transaction</code></a>
 (or <a class="autorefs autorefs-internal" title="transaction_if_not_already" href="../django_subatomic/db/#django_subatomic.db.transaction_if_not_already"><code>transaction_if_not_already</code></a> if necessary).</p>
 <p>In tests where after-commit callbacks should not be run,
 <a class="autorefs autorefs-internal" title="part_of_a_transaction" href="../django_subatomic/test/#django_subatomic.test.part_of_a_transaction"><code>part_of_a_transaction</code></a> should be used instead.</p>
@@ -847,11 +847,11 @@ on a per-test basis.</p>
 <p>(default: <code>True</code>)</p>
 <p><a class="autorefs autorefs-internal" title="transaction" href="../django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a>
 and <a class="autorefs autorefs-internal" title="transaction_if_not_already" href="../django_subatomic/db/#django_subatomic.db.transaction_if_not_already"><code>transaction_if_not_already</code></a>
-will raise <code>subatomic.db._UnhandledCallbacks</code> in tests
+will raise <code>django_subatomic.db._UnhandledCallbacks</code> in tests
 if they detect any lingering unhandled after-commit callbacks
 when they are called.
 <a class="autorefs autorefs-internal" title="part_of_a_transaction" href="../django_subatomic/test/#django_subatomic.test.part_of_a_transaction"><code>part_of_a_transaction</code></a>
-will raise <code>subatomic.test._UnhandledCallbacks</code> instead.
+will raise <code>django_subatomic.test._UnhandledCallbacks</code> instead.
 Note: because these exceptions each represent a programming error,
 they start with an underscore to discourage anyone from catching them.</p>
 <p>This highlights order-of-execution issues in tests
