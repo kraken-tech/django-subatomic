@@ -86,13 +86,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-    - run: |
-        git fetch origin main
-        git branch main origin/main
     - uses: actions/setup-python@v6
       with:
         python-version-file: '.github/workflows/.python-version'
     - run: pip install validate_commits
-    - run: validate-commits
+    - run: validate-commits --since=origin/main
