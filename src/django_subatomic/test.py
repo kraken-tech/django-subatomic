@@ -3,7 +3,6 @@ from __future__ import annotations
 import contextlib
 from typing import TYPE_CHECKING
 
-import attrs
 from django.conf import settings
 from django.db import transaction
 
@@ -16,7 +15,6 @@ __all__ = [
 ]
 
 
-@attrs.frozen
 class _UnhandledCallbacks(Exception):
     """
     Raised in tests when unhandled callbacks are found before calling `part_of_a_transaction`.
@@ -27,7 +25,9 @@ class _UnhandledCallbacks(Exception):
     The best solution is to ensure the after-commit callbacks are handled first.
     """
 
-    callbacks: tuple[Callable[[], object], ...]
+    def __init__(self, callbacks: tuple[Callable[[], object], ...]) -> None:
+        super().__init__()
+        self.callbacks = callbacks
 
 
 class _OnlyForUseInDjangoTestTransaction(Exception):
