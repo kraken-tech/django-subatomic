@@ -923,10 +923,10 @@ This creates a disconnect between test behaviour and production behaviour, poten
 <span class="k">def</span><span class="w"> </span><span class="nf">build_ABCD</span><span class="p">():</span>
     <span class="n">my_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
-        <span class="n">my_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>
-        <span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">my_list</span><span class="o">.</span><span class="n">append</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">))</span>
-        <span class="n">my_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
-    <span class="n">my_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
+        <span class="n">my_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"A"</span><span class="p">)</span>
+        <span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">my_list</span><span class="o">.</span><span class="n">append</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">))</span>
+        <span class="n">my_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"B"</span><span class="p">)</span>
+    <span class="n">my_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"D"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">my_list</span>
 </code></pre></div>
 <h3 id="in-production">In production<a class="headerlink" href="#in-production" title="Permanent link">&para;</a></h3>
@@ -937,7 +937,7 @@ This creates a disconnect between test behaviour and production behaviour, poten
 <span class="k">class</span><span class="w"> </span><span class="nc">TestBuildABCD</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_build_ABCD</span><span class="p">():</span>
         <span class="n">built</span> <span class="o">=</span> <span class="n">build_ABCD</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="n">built</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">]</span>  <span class="c1"># This will fail!</span>
+        <span class="k">assert</span> <span class="n">built</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"A"</span><span class="p">,</span> <span class="s2">"B"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"D"</span><span class="p">]</span>  <span class="c1"># This will fail!</span>
 </code></pre></div>
 <p>This fails because <code>build_ABCD()</code> returns <code>["A", "B", "D"]</code>,
 due to the fact that the after-commit callback never runs!</p>
@@ -955,10 +955,10 @@ Because the test transaction never commits, Django does not run the after-commit
 <span class="w"> </span>    my_list = []
 <span class="gd">-    with transaction.atomic():</span>
 <span class="gi">+    with subatomic_transaction():</span>
-<span class="w"> </span>        my_list.append(&quot;A&quot;)
-<span class="w"> </span>        django_transaction.on_commit(partial(my_list.append, &quot;C&quot;))
-<span class="w"> </span>        my_list.append(&quot;B&quot;)
-<span class="w"> </span>    my_list.append(&quot;D&quot;)
+<span class="w"> </span>        my_list.append("A")
+<span class="w"> </span>        django_transaction.on_commit(partial(my_list.append, "C"))
+<span class="w"> </span>        my_list.append("B")
+<span class="w"> </span>    my_list.append("D")
 <span class="w"> </span>    return my_list
 </code></pre></div>
 <p>Subatomic's <a class="autorefs autorefs-internal" title="transaction" href="../reference/django_subatomic/db/#django_subatomic.db.transaction"><code>transaction</code></a> explicitly represents a transaction,
@@ -974,8 +974,8 @@ but with some caveats.</p>
 <span class="k">class</span><span class="w"> </span><span class="nc">TestBuildABCD</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_build_ABCD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">captureOnCommitCallbacks</span><span class="p">(</span><span class="n">execute</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">built</span> <span class="o">=</span> <span class="n">build_ABCD</span><span class="p">()</span> <span class="c1"># This returns `[&quot;A&quot;, &quot;B&quot;, &quot;D&quot;, &quot;C&quot;]`</span>
-        <span class="k">assert</span> <span class="n">built</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">]</span>  <span class="c1"># This will fail!</span>
+            <span class="n">built</span> <span class="o">=</span> <span class="n">build_ABCD</span><span class="p">()</span> <span class="c1"># This returns `["A", "B", "D", "C"]`</span>
+        <span class="k">assert</span> <span class="n">built</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"A"</span><span class="p">,</span> <span class="s2">"B"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"D"</span><span class="p">]</span>  <span class="c1"># This will fail!</span>
 </code></pre></div>
 <p><a href="https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.TestCase.captureOnCommitCallbacks"><code>captureOnCommitCallbacks</code></a>
 captures and runs after-commit callbacks, but executes them after the tested function completes.
@@ -985,8 +985,8 @@ While the callbacks do run, the execution order differs from production, potenti
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TestBuildABCD</span><span class="p">(</span><span class="n">TransactionTestCase</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_build_ABCD</span><span class="p">():</span>
-        <span class="n">built</span> <span class="o">=</span> <span class="n">build_ABCD</span><span class="p">()</span> <span class="c1"># This returns `[&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;]`</span>
-        <span class="k">assert</span> <span class="n">built</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">]</span>
+        <span class="n">built</span> <span class="o">=</span> <span class="n">build_ABCD</span><span class="p">()</span> <span class="c1"># This returns `["A", "B", "C", "D"]`</span>
+        <span class="k">assert</span> <span class="n">built</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"A"</span><span class="p">,</span> <span class="s2">"B"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"D"</span><span class="p">]</span>
 </code></pre></div>
 <p>While the callbacks do run and the order of the results are correct,
 this can be extremely slow in large scale applications,

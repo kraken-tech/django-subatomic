@@ -1002,17 +1002,17 @@ Consider this like Django's <code>atomic(durable=True)</code>, but with added af
 <span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">transaction</span><span class="p">[</span><span class="o">**</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">](</span>
     <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">_GeneratorContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Create a database transaction.</span>
 
 <span class="sd">    Can be used as a decorator or a context manager.</span>
 
 <span class="sd">    Nested calls are not allowed because SQL does not support nested transactions.</span>
-<span class="sd">    Consider this like Django&#39;s `atomic(durable=True)`, but with added after-commit callback support in tests.</span>
+<span class="sd">    Consider this like Django's `atomic(durable=True)`, but with added after-commit callback support in tests.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        RuntimeError: if we call this from inside another existing transaction.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_transaction</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
@@ -1127,12 +1127,12 @@ transactions are managed.</p>
 <span class="normal">128</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">transaction_if_not_already</span><span class="p">[</span><span class="o">**</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">](</span>
     <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">_GeneratorContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a transaction if one isn&#39;t already open.</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Create a transaction if one isn't already open.</span>
 
 <span class="sd">    Can be used as a decorator or a context manager.</span>
 
-<span class="sd">    Use of this hints at code which lacks control over the state it&#39;s called in.</span>
+<span class="sd">    Use of this hints at code which lacks control over the state it's called in.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        This has a bit of a clunky name. This is a deliberate attempt to</span>
@@ -1147,12 +1147,12 @@ transactions are managed.</p>
 
 <span class="sd">        - In functions which can unambiguously control transactions,</span>
 <span class="sd">          use [`transaction`][django_subatomic.db.transaction].</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_transaction_if_not_already</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">in_transaction</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">):</span>
-            <span class="k">yield</span>  <span class="c1"># If we&#39;re already in a transaction, do nothing.</span>
+            <span class="k">yield</span>  <span class="c1"># If we're already in a transaction, do nothing.</span>
             <span class="k">return</span>
 
         <span class="c1"># If the innermost atomic block is from a test case, `transaction` will create a SAVEPOINT.</span>
@@ -1254,7 +1254,7 @@ transactions are managed.</p>
 <span class="normal">155</span>
 <span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@_utils</span><span class="o">.</span><span class="n">contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">savepoint</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Create a database savepoint.</span>
 
 <span class="sd">    Can be used as a context manager, but _not_ as a decorator.</span>
@@ -1272,7 +1272,7 @@ transactions are managed.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        _MissingRequiredTransaction: if we are not in a transaction</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">with</span> <span class="p">(</span>
         <span class="n">transaction_required</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">),</span>
         <span class="n">django_transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">),</span>
@@ -1364,18 +1364,18 @@ but fail in production.</p>
 <span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">transaction_required</span><span class="p">[</span><span class="o">**</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">](</span>
     <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">_GeneratorContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Make sure that code is always executed in a transaction.</span>
 
 <span class="sd">    Can be used as a decorator or a context manager.</span>
 
 <span class="sd">    We ignore test-suite transactions when checking for a transaction</span>
-<span class="sd">    because we don&#39;t want to run the risk of allowing code to pass tests</span>
+<span class="sd">    because we don't want to run the risk of allowing code to pass tests</span>
 <span class="sd">    but fail in production.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        _MissingRequiredTransaction: if we are not in a transaction.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_transaction_required</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
@@ -1493,13 +1493,13 @@ transaction.</p>
 <span class="normal">237</span>
 <span class="normal">238</span>
 <span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">durable</span><span class="p">[</span><span class="o">**</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">](</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="n">P</span><span class="p">,</span> <span class="n">R</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Enforce durability with this decorator.</span>
 
 <span class="sd">    Can be used as a decorator, but _not_ as a context manager.</span>
 
-<span class="sd">    &quot;Durability&quot; means that the function&#39;s work cannot be rolled back after it completes,</span>
-<span class="sd">    and is not to be confused with &quot;atomicity&quot; (which is about ensuring that the function</span>
+<span class="sd">    "Durability" means that the function's work cannot be rolled back after it completes,</span>
+<span class="sd">    and is not to be confused with "atomicity" (which is about ensuring that the function</span>
 <span class="sd">    either completes all its work or none of it).</span>
 
 <span class="sd">    We enforce this by ensuring that the function is not called within a transaction,</span>
@@ -1510,7 +1510,7 @@ transaction.</p>
 <span class="sd">        _UnexpectedDanglingTransaction: if a transaction remains open after the decorated</span>
 <span class="sd">            function exits. Before raising this exeption, we roll back and end the</span>
 <span class="sd">            transaction.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">P</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">P</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">R</span><span class="p">:</span>
@@ -1605,7 +1605,7 @@ silently" so this behaviour is not available from this function.</p>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Register a callback to be called after the current transaction is committed.</span>
 
 <span class="sd">    (Transactions created by the test suite are deliberately ignored.)</span>
@@ -1617,10 +1617,10 @@ silently" so this behaviour is not available from this function.</p>
 <span class="sd">    you may disable this with [`settings.SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION`][subatomic_after_commit_needs_transaction].</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Django&#39;s `on_commit` has a `robust` parameter, which allows a callback</span>
-<span class="sd">        to fail silently. Kraken has a convention to &quot;not allow code to fail</span>
-<span class="sd">        silently&quot; so this behaviour is not available from this function.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Django's `on_commit` has a `robust` parameter, which allows a callback</span>
+<span class="sd">        to fail silently. Kraken has a convention to "not allow code to fail</span>
+<span class="sd">        silently" so this behaviour is not available from this function.</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">using</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">using</span> <span class="o">=</span> <span class="n">django_db</span><span class="o">.</span><span class="n">DEFAULT_DB_ALIAS</span>
 
@@ -1629,7 +1629,7 @@ silently" so this behaviour is not available from this function.</p>
     <span class="n">only_in_testcase_transaction</span> <span class="o">=</span> <span class="n">_innermost_atomic_block_wraps_testcase</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="c1"># See Note [Running after-commit callbacks in tests]</span>
-        <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">"SUBATOMIC_RUN_AFTER_COMMIT_CALLBACKS_IN_TESTS"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="ow">and</span> <span class="n">only_in_testcase_transaction</span>
     <span class="p">):</span>
         <span class="n">callback</span><span class="p">()</span>
@@ -1696,20 +1696,20 @@ testcase transactions are not considered a transaction.</p>
 <span class="normal">573</span>
 <span class="normal">574</span>
 <span class="normal">575</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">in_transaction</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Return `True` if the database connection has a transaction active.</span>
 
 <span class="sd">    A transaction is active if the connection is no longer in autocommit mode.</span>
 
-<span class="sd">    So that code doesn&#39;t need to handle how testcase transactions work,</span>
+<span class="sd">    So that code doesn't need to handle how testcase transactions work,</span>
 <span class="sd">    testcase transactions are not considered a transaction.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">using</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">using</span> <span class="o">=</span> <span class="n">django_db</span><span class="o">.</span><span class="n">DEFAULT_DB_ALIAS</span>
 
     <span class="n">connection</span> <span class="o">=</span> <span class="n">django_db</span><span class="o">.</span><span class="n">connections</span><span class="p">[</span><span class="n">using</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># If there is no database connection, we can&#39;t be in a transaction.</span>
+        <span class="c1"># If there is no database connection, we can't be in a transaction.</span>
         <span class="c1"># We need to check this before checking for an open transaction,</span>
         <span class="c1"># because `get_autocommit()` would open a database connection</span>
         <span class="c1"># which we might not use and would consume resources unnecessarily.</span>
@@ -1721,7 +1721,7 @@ testcase transactions are not considered a transaction.</p>
 
     <span class="n">only_in_testcase_transaction</span> <span class="o">=</span> <span class="n">_innermost_atomic_block_wraps_testcase</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">)</span>
 
-    <span class="c1"># To make this as clear as possible I&#39;ve spelled out the boolean logic here,</span>
+    <span class="c1"># To make this as clear as possible I've spelled out the boolean logic here,</span>
     <span class="c1"># and have told ruff to ignore that this could have been simply:</span>
     <span class="c1">#</span>
     <span class="c1">#     return not only_in_testcase_transaction</span>
@@ -1765,9 +1765,9 @@ testcase transactions are not considered a transaction.</p>
 <span class="normal">587</span>
 <span class="normal">588</span>
 <span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dbs_with_open_transactions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get the names of databases with open transactions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">dbs_with_open_transaction</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="c1"># Note: django_db.connections is a special class which implements __iter__,</span>
     <span class="c1"># and should not be confused with a list or dict.</span>

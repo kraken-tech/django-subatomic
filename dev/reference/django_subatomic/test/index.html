@@ -836,31 +836,31 @@ to ensure we don't misleadingly run after-commit callbacks.</p>
 <span class="normal">87</span>
 <span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">part_of_a_transaction</span><span class="p">(</span><span class="n">using</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Allow calling &quot;transaction required&quot; code without an explicit transaction.</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Allow calling "transaction required" code without an explicit transaction.</span>
 
 <span class="sd">    This is useful for directly testing code marked with [`transaction_required`][django_subatomic.db.transaction_required]</span>
 <span class="sd">    without going through other code which is responsible for managing a transaction.</span>
 
-<span class="sd">    This works by entering a new &quot;atomic&quot; block, so that the inner-most &quot;atomic&quot;</span>
-<span class="sd">    isn&#39;t the one created by the test-suite.</span>
+<span class="sd">    This works by entering a new "atomic" block, so that the inner-most "atomic"</span>
+<span class="sd">    isn't the one created by the test-suite.</span>
 
 <span class="sd">    Note that this does not handle after-commit callback simulation. If you need that,</span>
 <span class="sd">    use [`transaction`][django_subatomic.db.transaction] instead.</span>
 
-<span class="sd">    In production code and &quot;transaction testcases&quot; this will raise an error</span>
-<span class="sd">    to ensure we don&#39;t misleadingly run after-commit callbacks.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    In production code and "transaction testcases" this will raise an error</span>
+<span class="sd">    to ensure we don't misleadingly run after-commit callbacks.</span>
+<span class="sd">    """</span>
     <span class="n">connection</span> <span class="o">=</span> <span class="n">transaction</span><span class="o">.</span><span class="n">get_connection</span><span class="p">(</span><span class="n">using</span><span class="p">)</span>
 
     <span class="n">raise_unhandled_callbacks</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
-        <span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS&quot;</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="n">settings</span><span class="p">,</span> <span class="s2">"SUBATOMIC_CATCH_UNHANDLED_AFTER_COMMIT_CALLBACKS_IN_TESTS"</span><span class="p">,</span> <span class="kc">True</span>
     <span class="p">)</span>
 
     <span class="c1"># We must be called from inside an atomic block created by the test suite</span>
     <span class="c1"># to avoid running after-commit callbacks on exit.</span>
-    <span class="c1"># We don&#39;t check that the atomic block is from the test suite though,</span>
-    <span class="c1"># because if it&#39;s created elsewhere we&#39;ll see an error from `durable=True` below.</span>
+    <span class="c1"># We don't check that the atomic block is from the test suite though,</span>
+    <span class="c1"># because if it's created elsewhere we'll see an error from `durable=True` below.</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">atomic_blocks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">_OnlyForUseInDjangoTestTransaction</span>
 
@@ -875,8 +875,8 @@ to ensure we don't misleadingly run after-commit callbacks.</p>
         <span class="k">yield</span>
 
     <span class="c1"># Throw away any callbacks that were registered during the partial transaction,</span>
-    <span class="c1"># so that they don&#39;t pollute later code.</span>
-    <span class="c1"># We don&#39;t need to do this in `try: ... finally:` because Django&#39;s roll</span>
+    <span class="c1"># so that they don't pollute later code.</span>
+    <span class="c1"># We don't need to do this in `try: ... finally:` because Django's roll</span>
     <span class="c1"># back logic already clears the callbacks when an exception is raised.</span>
     <span class="n">connection</span><span class="o">.</span><span class="n">run_on_commit</span> <span class="o">=</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
