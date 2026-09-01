@@ -62,8 +62,7 @@ def enrol_with_rewards(username, email):
 # We mark as `durable` because rolling back a transaction will not
 # unsend the email.
 @db.durable
-def send_email(email):
-    ...
+def send_email(email): ...
 ```
 
 ```python title="Tests" hl_lines="5-6"
@@ -73,7 +72,7 @@ from django_subatomic import test
 def test_create_user():
     # `create_user` requires a transaction, so we must emulate one in the test.
     with test.part_of_a_transaction():
-        create_user('bob')
+        create_user("bob")
 
     assert ...
 ```
