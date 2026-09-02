@@ -7,8 +7,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-- Django 6.1 has been added to the test matrix.
-
 ### Changed
 
 - Exceptions raised through `transaction_if_not_already`
@@ -17,6 +15,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Remove `attrs` dependency.
 
 ### Added
+
 - Added MariaDB and SQLite to the test matrix.
 - `part_of_a_transaction` now raises an error if it is called outside of tests.
   This prevents code which misleadingly runs after-commit callbacks.
@@ -29,14 +28,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   To fix this error, use `transaction` instead of `atomic`
   (or to explicitly disable callbacks when testing low-level code use `part_of_a_transaction`).
   The error can be silenced by setting `SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS` setting to `False`.
+- Django 6.1 has been added to the test matrix.
+
 
 ### Fixed
+
 - Disallowed nesting of `part_of_a_transaction` to prevent nonsense
   implication of nested partial transactions in tests. Fixes #150.
 - `part_of_a_transaction` now clears after-commit callbacks from the transaction before it exits.
   This avoids polluting the test's transaction with callbacks.
 
 ## [1.0.0] - 2026-04-16
+
+There have been no functional changes since v0.2.1.
+
+This release expresses that we believe the API to now be stable and production-ready.
 
 ## [0.2.1] - 2026-02-06
 
