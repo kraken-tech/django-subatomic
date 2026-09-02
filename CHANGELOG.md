@@ -38,6 +38,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2026-04-16
 
+There have been no functional changes since v0.2.1.
+
+This release expresses that we believe the API to now be stable and production-ready.
+
 ## [0.2.1] - 2026-02-06
 
 ### Changed
