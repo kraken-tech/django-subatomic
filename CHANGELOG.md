@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+- Django 6.1 has been added to the test matrix.
+
 ### Changed
 
 - Exceptions raised through `transaction_if_not_already`
