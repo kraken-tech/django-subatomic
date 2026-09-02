@@ -15,6 +15,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Remove `attrs` dependency.
 
 ### Added
+
 - Added MariaDB and SQLite to the test matrix.
 - `part_of_a_transaction` now raises an error if it is called outside of tests.
   This prevents code which misleadingly runs after-commit callbacks.
@@ -31,6 +32,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
 ### Fixed
+
 - Disallowed nesting of `part_of_a_transaction` to prevent nonsense
   implication of nested partial transactions in tests. Fixes #150.
 - `part_of_a_transaction` now clears after-commit callbacks from the transaction before it exits.
