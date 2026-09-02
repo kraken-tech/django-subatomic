@@ -7,8 +7,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-- Django 6.1 has been added to the test matrix.
-
 ### Changed
 
 - Exceptions raised through `transaction_if_not_already`
@@ -29,6 +27,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   To fix this error, use `transaction` instead of `atomic`
   (or to explicitly disable callbacks when testing low-level code use `part_of_a_transaction`).
   The error can be silenced by setting `SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS` setting to `False`.
+- Django 6.1 has been added to the test matrix.
+
 
 ### Fixed
 - Disallowed nesting of `part_of_a_transaction` to prevent nonsense
