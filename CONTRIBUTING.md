@@ -123,6 +123,24 @@ you can serve the docs locally with:
 mkdocs serve
 ```
 
+## Releasing to PyPI
+
+1. Create a new branch from `main`.
+
+2. Update the `pyproject.toml` file with the new version number,
+   in the format `X.Y.Z`.
+
+3. Add a heading-2 below the `[Unreleased]` section in `CHANGELOG.md`
+   with the version number and the date of the release.
+   Something like `## [X.Y.Z] - 2042-09-15`.
+
+4. Commit and open a pull request to merge the version changes into `main`.
+
+5. Once merged, tag the merge-commit with the version number
+   in the format `vX.Y.Z`, and push the tag to GitHub.
+
+6. Verify that the GitHub Action successfully built and published the package to PyPI.
+
 
 [GitHub Pages]: https://pages.github.com/
 [Material for MkDocs]: https://squidfunk.github.io/mkdocs-material/

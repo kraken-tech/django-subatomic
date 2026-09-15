@@ -4,7 +4,7 @@
 [project]
 name = "django-subatomic"
 description = "Fine-grained database transaction control for Django."
-version = "1.0.0"
+version = "2.0.0"
 
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
