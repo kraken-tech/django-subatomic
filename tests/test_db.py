@@ -28,9 +28,6 @@ if TYPE_CHECKING:
 DEFAULT = "default"
 OTHER = "other"
 
-# By default, assume tests in this module need access to the default database.
-pytestmark = [pytest.mark.django_db(databases=[DEFAULT])]
-
 
 def _parametrize_transaction_testcase(func: Callable[..., None]) -> MarkDecorator:
     """
@@ -47,7 +44,7 @@ def _parametrize_transaction_testcase(func: Callable[..., None]) -> MarkDecorato
             pytest.param(
                 False,
                 id="testsuite transaction",
-                marks=[],
+                marks=[pytest.mark.django_db()],
             ),
         ),
     )
@@ -137,6 +134,7 @@ class TestTransaction:
         assert was_called is True
         assert django_transaction.get_autocommit() is True
 
+    @pytest.mark.django_db
     def test_works_in_tests(self) -> None:
         """
         Tests can call `db.transaction` without a fuss.
@@ -213,6 +211,7 @@ class TestOnCommitCallbacksInTests:
         assert error_raised is True
         assert counter.count == 1
 
+    @pytest.mark.django_db
     @pytest.mark.parametrize(
         "transaction_manager",
         (db.transaction, db.transaction_if_not_already),
@@ -241,6 +240,7 @@ class TestOnCommitCallbacksInTests:
         assert counter.count == 0
         assert exc_info.value.callbacks == (counter.increment,)
 
+    @pytest.mark.django_db
     @pytest.mark.parametrize(
         "transaction_manager",
         (db.transaction, db.transaction_if_not_already),
@@ -271,6 +271,7 @@ class TestOnCommitCallbacksInTests:
 
         assert counter.count == 1
 
+    @pytest.mark.django_db
     @pytest.mark.parametrize(
         "transaction_manager",
         (db.transaction, db.transaction_if_not_already),
@@ -296,6 +297,7 @@ class TestOnCommitCallbacksInTests:
         # The callback was not run a second time.
         assert counter.count == 1
 
+    @pytest.mark.django_db
     @pytest.mark.parametrize(
         "transaction_manager",
         (db.transaction, db.transaction_if_not_already),
@@ -383,6 +385,7 @@ class TestTransactionRequired:
 
 
 class TestSavepointContextManager:
+    @pytest.mark.django_db
     def test_fails_when_not_in_transaction(self) -> None:
         """
         An error is raised when trying to create a savepoint outside of a transaction.
@@ -404,6 +407,7 @@ class TestSavepointContextManager:
             @db.savepoint()  # type: ignore[operator]
             def inner() -> None: ...
 
+    @pytest.mark.django_db
     @test.part_of_a_transaction()
     def test_creates_savepoint(
         self, django_assert_num_queries: pytest_django.DjangoAssertNumQueries
@@ -422,6 +426,7 @@ class TestSavepointContextManager:
 
 
 class TestTransactionIfNotAlready:
+    @pytest.mark.django_db
     def test_transaction_already_exists(
         self, django_assert_num_queries: pytest_django.DjangoAssertNumQueries
     ) -> None:
@@ -443,6 +448,7 @@ class TestTransactionIfNotAlready:
 
         assert django_transaction.get_autocommit() is True
 
+    @pytest.mark.django_db
     def test_can_query_after_exception_in_test_case(self) -> None:
         """
         Check that we have a working database connection and may do queries after catching an exception.
@@ -595,6 +601,7 @@ class TestRunAfterCommit:
         assert exc.value.database == DEFAULT
         assert counter.count == 0
 
+    @pytest.mark.django_db
     def test_ambiguous_after_commit_callback(self) -> None:
         """
         `run_after_commit` errors if we're not sure if tests should emulate transactions.
@@ -625,6 +632,7 @@ class TestRunAfterCommit:
 
         assert counter.count == 1
 
+    @pytest.mark.django_db
     def test_ambiguous_simulation_requirement_disabled(self) -> None:
         """
         Callbacks aren't simulated in tests when ambiguous simulation requirement errors are disabled.
@@ -679,6 +687,7 @@ class TestRunAfterCommit:
 
         assert counter.count == 1
 
+    @pytest.mark.django_db
     @pytest.mark.parametrize(
         "expects_transaction",
         (
@@ -725,6 +734,7 @@ class TestRunAfterCommit:
 
 
 class TestRunAfterCommitCallbacksSettingBehaviour:
+    @pytest.mark.django_db
     @override_settings(SUBATOMIC_AFTER_COMMIT_NEEDS_TRANSACTION=False)
     def test_does_not_execute_when_in_testcase_transaction_if_callbacks_disabled(
         self,
@@ -742,6 +752,7 @@ class TestRunAfterCommitCallbacksSettingBehaviour:
 
         assert counter.count == 0
 
+    @pytest.mark.django_db
     @pytest.mark.parametrize(
         "transaction_context",
         (
@@ -771,6 +782,7 @@ class TestInTransaction:
     Tests of `in_transaction`.
     """
 
+    @pytest.mark.django_db
     def test_only_in_testcase_transaction(self) -> None:
         """
         We ignore the testcase transaction.
@@ -857,6 +869,7 @@ class TestInTransaction:
 
 
 class TestDBsWithOpenTransaction:
+    @pytest.mark.django_db
     def test_testcase_transaction_ignored(self) -> None:
         """
         We don't count the testcase transaction as an open transaction.
