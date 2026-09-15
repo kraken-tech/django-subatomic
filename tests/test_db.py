@@ -580,6 +580,11 @@ class TestDurable:
         # The transaction has been rolled back.
         assert db.in_transaction(using=db_name) is False
 
+    # Note: no @pytest.mark.django_db decorator.
+    # This lets us prove `durable` doesn't need direct database access.
+    def test_durable_in_test_without_db_access(self) -> None:
+        _durable_example()  # No error is raised.
+
 
 class TestRunAfterCommit:
     """
