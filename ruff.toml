@@ -6,9 +6,7 @@ ignore = [
     "CPY001", # We do not include copyright notices in individual files
     "D1", # Missing docstring in {}
     "D200", # One-line docstring should fit on one line
-    "D203", # 1 blank line required before class docstring
     "D212", # Multi-line docstring summary should start at the first line
-    "D413", # Missing blank line after last section ("{name}")
     "E501", # Line too long
     "N818", # Exception name `...` should be named with an Error suffix
     "PT007",  # Wrong values type in `pytest.mark.parametrize` expected `list` of `tuple`
@@ -49,3 +47,6 @@ section-order = [
     "django_subatomic",
     "tests",
 ]
+
+[lint.pydocstyle]
+convention = "google"
