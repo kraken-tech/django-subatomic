@@ -1,0 +1,3 @@
+[[checks.summary]]
+pattern = '\S*(?i:wip)\S*'
+message = "Work-in-progress commit."
