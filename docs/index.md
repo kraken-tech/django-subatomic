@@ -28,7 +28,7 @@ Run after transaction completes | `transaction.on_commit()` | [`run_after_commit
 
 ## Example
 
-```python hl_lines="5-6 10-11 17-19 27-28 31-33"
+```python hl_lines="5-6 10-11 17-19 25-26 29-30 33-35"
 from django_subatomic import db
 
 
@@ -53,6 +53,8 @@ def create_user(username):
     Profile.objects.create(user=user)
 
 
+# We need a transaction if we are to defer a callback until after the commit.
+@db.transaction_required
 def enrol_with_rewards(username, email):
     do_stuff_that_might_fail(username, email)
     # Defer sending the email until after the transaction commits successfully.
@@ -65,14 +67,15 @@ def enrol_with_rewards(username, email):
 def send_email(email): ...
 ```
 
-```python title="Tests" hl_lines="5-6"
+```python title="Tests" hl_lines="5-7"
 from django_subatomic import test
 
 
-def test_create_user():
-    # `create_user` requires a transaction, so we must emulate one in the test.
+def test_enrol_with_rewards():
+    # We don't want to run after-commit callbacks in this test,
+    # so we use `part_of_a_transaction` instead of `transaction`.
     with test.part_of_a_transaction():
-        create_user("bob")
+        enrol_with_rewards("bob", "bob@example.com")  # Requires a transaction.
 
     assert ...
 ```
