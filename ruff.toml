@@ -2,19 +2,13 @@
 [lint]
 select = ["ALL"]
 ignore = [
-    "COM812", # Trailing comma missing
+    "COM812", "E501", "ISC001",  # Conflict with formatter
     "CPY001", # We do not include copyright notices in individual files
-    "D1", # Missing docstring in {}
-    "D200", # One-line docstring should fit on one line
-    "D212", # Multi-line docstring summary should start at the first line
-    "E501", # Line too long
-    "N818", # Exception name `...` should be named with an Error suffix
-    "PT007",  # Wrong values type in `pytest.mark.parametrize` expected `list` of `tuple`
-    "RET505", # Unnecessary `else` after `return` statement
-    # The following rules may cause conflicts when used with the formatter: `...`. To avoid
-    # unexpected behavior, we recommend disabling these rules, either by removing them from the
-    # `select` or `extend-select` configuration, or adding them to the `ignore` configuration.
-    "ISC001",  # Implicitly concatenated string literals on one line
+    "D1", # Requires docstrings where we don't need them
+    "D200", "D212", # Conflict with Kraken docstring conventions
+    "N818", # Requires Hungarian notation for exceptions
+    "PT007",  # Unecessarily fussy
+    "RET505", # Disallows some explicit control flow that we prefer
 ]
 
 [lint.per-file-ignores]
