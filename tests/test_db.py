@@ -433,9 +433,7 @@ class TestTransactionIfNotAlready:
                     pass
 
     @pytest.mark.django_db(transaction=True)
-    def test_no_existing_transaction(
-        self, django_assert_num_queries: pytest_django.DjangoAssertNumQueries
-    ) -> None:
+    def test_no_existing_transaction(self) -> None:
         assert django_transaction.get_autocommit() is True
 
         with db.transaction_if_not_already():
