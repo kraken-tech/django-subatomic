@@ -286,8 +286,8 @@ def _execute_on_commit_callbacks_in_tests(using: str | None = None) -> Generator
                     raise
 
 
-# Note [_MissingRequiredTransaction in tests]
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Note [_MissingRequiredTransaction raised in tests]
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # Code that uses `db.transaction_required()` (such as `db.savepoint()`) expects
 # that a transaction already exists.
@@ -318,7 +318,7 @@ class _MissingRequiredTransaction(Exception):
       wrap your call in `with django_subatomic.test.part_of_a_transaction()`.
       Or, if you also want after-commit callbacks to execute, use `transaction()`.
 
-    See Note [_MissingRequiredTransaction in tests]
+    See Note [_MissingRequiredTransaction raised in tests]
 
     This exception should not be caught, as it indicates a programming error.
     """
@@ -350,7 +350,7 @@ class _AmbiguousAfterCommitTestBehaviour(Exception):
     you can disable this requirement for after-commit callbacks by setting
     `settings.SUBATOMIC_AFTER_COMMIT_AMBIGUITY_ERROR_IN_TESTS` to `False`.
 
-    See Note [_MissingRequiredTransaction in tests]
+    See Note [_MissingRequiredTransaction raised in tests]
 
     This exception should not be caught, as it indicates a programming error.
     """
