@@ -1724,7 +1724,7 @@ testcase transactions are not considered a transaction.</p>
     <span class="c1"># To make this as clear as possible I've spelled out the boolean logic here,</span>
     <span class="c1"># and have told ruff to ignore that this could have been simply:</span>
     <span class="c1">#</span>
-    <span class="c1">#     return not only_in_testcase_transaction</span>
+    <span class="c1">#     return not only_in_testcase_transaction  # noqa: ERA001</span>
     <span class="k">if</span> <span class="n">only_in_testcase_transaction</span><span class="p">:</span>  <span class="c1"># noqa: SIM103</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
