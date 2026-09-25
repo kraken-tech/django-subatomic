@@ -173,18 +173,18 @@ class TestOnCommitCallbacksInTests:
         If a callback fails, later callbacks do not run.
         """
         counter = Counter()
-        transaction_body_end_reached = False
 
         def raises() -> None:
             raise _AnError
 
-        with pytest.raises(_AnError):
-            with db.transaction():
-                db.run_after_commit(raises)
-                db.run_after_commit(counter.increment)
-                transaction_body_end_reached = True
+        transaction = db.transaction()
+        transaction.__enter__()
+        db.run_after_commit(raises)
+        db.run_after_commit(counter.increment)
 
-        assert transaction_body_end_reached is True
+        with pytest.raises(_AnError):
+            transaction.__exit__(None, None, None)
+
         # The increment callback is never run.
         assert counter.count == 0
 
