@@ -568,7 +568,7 @@ def in_transaction(*, using: str | None = None) -> bool:
     # To make this as clear as possible I've spelled out the boolean logic here,
     # and have told ruff to ignore that this could have been simply:
     #
-    #     return not only_in_testcase_transaction
+    #     return not only_in_testcase_transaction  # noqa: ERA001
     if only_in_testcase_transaction:  # noqa: SIM103
         return False
     else:
