@@ -97,10 +97,13 @@ class TestPartOfATransaction:
 
         class _ArbitraryError(Exception): ...
 
-        with pytest.raises(_ArbitraryError):
+        try:
             with test.part_of_a_transaction():
                 db.run_after_commit(_callback_which_should_not_be_called)
-                raise _ArbitraryError
+                # exit `part_of_a_transaction` with an exception
+                raise _ArbitraryError  # noqa: TRY301
+        except _ArbitraryError:
+            pass
 
         # If the callbacks weren't cleared, this would raise an error.
         with db.transaction():
